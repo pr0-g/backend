@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
@@ -17,8 +18,8 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping
-    public String hello() {
+    public CommonResponse<String> hello() {
         Optional<User> byId = userRepository.findById(1L);
-        return byId.toString();
+        return CommonResponse.ok(byId.toString());
     }
 }
