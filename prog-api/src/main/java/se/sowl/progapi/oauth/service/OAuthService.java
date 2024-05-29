@@ -31,7 +31,6 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = getOAuth2User(userRequest);
         UserProfile userProfile = extractUserProfile(userRequest, oAuth2User.getAttributes());
-        System.out.println("userProfile = " + userProfile.getEmail() + userProfile.getProvider());
         User user = userRepository.findByEmailAndProvider(userProfile.getEmail(), userProfile.getProvider())
             .map(existingUser -> updateUser(existingUser, userProfile))
             .orElseGet(() -> saveUser(userProfile));
