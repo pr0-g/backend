@@ -45,6 +45,10 @@ subprojects {
     }
 
     tasks.register("prepareKotlinBuildScriptModel"){}
+
+    test {
+        useJUnitPlatform()
+    }
 }
 
 bootJar {
