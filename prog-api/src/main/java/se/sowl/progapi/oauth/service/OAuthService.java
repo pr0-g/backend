@@ -2,7 +2,6 @@ package se.sowl.progapi.oauth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -25,6 +24,7 @@ import static java.util.Collections.singleton;
 public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserRepository userRepository;
+    private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
 
     @Override
     @Transactional
@@ -38,10 +38,8 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
         return createOAuth2User(userRequest, oAuth2User.getAttributes(), userProfile, user);
     }
 
-    // TODO: 인터페이스로 분리 -> 테스트를 위해 public 이 되면 안된다.
-    public OAuth2User getOAuth2User(OAuth2UserRequest userRequest) {
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-        return delegate.loadUser(userRequest);
+    private OAuth2User getOAuth2User(OAuth2UserRequest userRequest) {
+        return oAuth2UserService.loadUser(userRequest);
     }
 
     private UserProfile extractUserProfile(OAuth2UserRequest userRequest, Map<String, Object> attributes) {

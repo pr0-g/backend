@@ -4,10 +4,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
 import se.sowl.progdomain.user.domain.User;
@@ -26,6 +29,9 @@ public class OAuthServiceTest {
     @SpyBean
     private OAuthService oAuthService;
 
+    @MockBean
+    private DefaultOAuth2UserService defaultOAuth2UserService;
+
     @Test
     @DisplayName("이미 가입 된 유저인 경우 갱신 후 유저 정보를 응답해야 한다.")
     @Transactional
@@ -35,12 +41,14 @@ public class OAuthServiceTest {
         User user = createUser(1L, "박정수", "화솔", "hwasowl598@gmail.com", "google");
         userRepository.save(user);
 
-        OAuth2UserRequest userRequest = mock(OAuth2UserRequest.class);
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
+        ClientRegistration clientRegistration = createClientRegistration();
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+
         String updatedName = "박정수(수정됨)";
-        Map<String, Object> attributes = Map.of("email", "hwasowl598@gmail.com", "name", updatedName);
-        when(userRequest.getClientRegistration()).thenReturn(createClientRegistration());
+        Map<String, Object> attributes = Map.of("sub", "1234567890", "email", "hwasowl598@gmail.com", "name", updatedName);
         when(oAuth2User.getAttributes()).thenReturn(attributes);
-        doReturn(oAuth2User).when(oAuthService).getOAuth2User(userRequest);
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
 
         // when
         OAuth2User result = oAuthService.loadUser(userRequest);
@@ -60,11 +68,13 @@ public class OAuthServiceTest {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
 
-        OAuth2UserRequest userRequest = mock(OAuth2UserRequest.class);
-        Map<String, Object> attributes = Map.of("email", "hwasowl598@gmail.com", "name", "박정수");
-        when(userRequest.getClientRegistration()).thenReturn(createClientRegistration());
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
+        ClientRegistration clientRegistration = createClientRegistration();
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+
+        Map<String, Object> attributes = Map.of("sub", "1234567890", "email", "hwasowl598@gmail.com", "name", "박정수");
         when(oAuth2User.getAttributes()).thenReturn(attributes);
-        doReturn(oAuth2User).when(oAuthService).getOAuth2User(userRequest);
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
 
         // when
         OAuth2User result = oAuthService.loadUser(userRequest);
