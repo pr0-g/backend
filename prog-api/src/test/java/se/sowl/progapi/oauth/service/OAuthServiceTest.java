@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
+import se.sowl.progdomain.oauth.domain.Provider;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 import java.util.Map;
@@ -41,13 +42,14 @@ public class OAuthServiceTest {
     public void loadExistGoogleUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String provider = Provider.GOOGLE.getRegistrationId();
         String email = "hwasowl598@gmail.com";
         String name = "박정수";
-        User user = createUser(1L, name, "화솔", email, "google");
+        User user = createUser(1L, name, "화솔", email, provider);
         userRepository.save(user);
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration("google");
+        ClientRegistration clientRegistration = createClientRegistration(provider);
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
 
         Map<String, Object> attributes = getGoogleAttribute(name, email);
@@ -62,7 +64,7 @@ public class OAuthServiceTest {
         Map<String, Object> resultAttributes = result.getAttributes();
         assertThat(resultAttributes.get("name")).isEqualTo(name);
         assertThat(resultAttributes.get("email")).isEqualTo(email);
-        assertThat(resultAttributes.get("provider")).isEqualTo("google");
+        assertThat(resultAttributes.get("provider")).isEqualTo(provider);
     }
 
     @Test
@@ -71,13 +73,14 @@ public class OAuthServiceTest {
     public void loadExistKakaoUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String provider = Provider.KAKAO.getRegistrationId();
         String email = "hwasowl598@kakao.com";
         String name = "박정수";
-        User user = createUser(2L, name, "화솔", email, "kakao");
+        User user = createUser(2L, name, "화솔", email, provider);
         userRepository.save(user);
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration("kakao");
+        ClientRegistration clientRegistration = createClientRegistration(provider);
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
 
         Map<String, Object> attributes = getKakaoAttribute(name, email);
@@ -92,7 +95,7 @@ public class OAuthServiceTest {
         Map<String, Object> resultAttributes = result.getAttributes();
         assertThat(resultAttributes.get("name")).isEqualTo(name);
         assertThat(resultAttributes.get("email")).isEqualTo(email);
-        assertThat(resultAttributes.get("provider")).isEqualTo("kakao");
+        assertThat(resultAttributes.get("provider")).isEqualTo(provider);
     }
 
     @Test
@@ -101,13 +104,14 @@ public class OAuthServiceTest {
     public void loadExistNaverUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String provider = Provider.NAVER.getRegistrationId();
         String email = "hwasowl598@naver.com";
         String name = "박정수";
-        User user = createUser(2L, name, "화솔", email, "naver");
+        User user = createUser(2L, name, "화솔", email, provider);
         userRepository.save(user);
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration("naver");
+        ClientRegistration clientRegistration = createClientRegistration(provider);
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
         Map<String, Object> attributes = getNaverAttribute(name, email);
         when(oAuth2User.getAttributes()).thenReturn(attributes);
@@ -121,7 +125,7 @@ public class OAuthServiceTest {
         Map<String, Object> resultAttributes = result.getAttributes();
         assertThat(resultAttributes.get("name")).isEqualTo(name);
         assertThat(resultAttributes.get("email")).isEqualTo(email);
-        assertThat(resultAttributes.get("provider")).isEqualTo("naver");
+        assertThat(resultAttributes.get("provider")).isEqualTo(provider);
     }
 
     @Test
@@ -130,11 +134,12 @@ public class OAuthServiceTest {
     public void loadNotExistGoogleUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String provider = Provider.GOOGLE.getRegistrationId();
         String name = "박정수";
         String email = "hwasowl598@gmail.com";
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration("google");
+        ClientRegistration clientRegistration = createClientRegistration(provider);
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
 
         Map<String, Object> attributes = getGoogleAttribute(name, email);
@@ -148,9 +153,9 @@ public class OAuthServiceTest {
         // then
         assertThat(result).isNotNull();
         Map<String, Object> resultAttributes = result.getAttributes();
-        assertThat(resultAttributes.get("name")).isEqualTo("박정수");
-        assertThat(resultAttributes.get("email")).isEqualTo("hwasowl598@gmail.com");
-        assertThat(resultAttributes.get("provider")).isEqualTo("google");
+        assertThat(resultAttributes.get("name")).isEqualTo(name);
+        assertThat(resultAttributes.get("email")).isEqualTo(email);
+        assertThat(resultAttributes.get("provider")).isEqualTo(provider);
     }
 
     @Test
@@ -158,11 +163,12 @@ public class OAuthServiceTest {
     void loadNotExistKaKaoUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String provider = Provider.KAKAO.getRegistrationId();
         String email = "hwasowl598@kakao.com";
         String name = "박정수";
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration("kakao");
+        ClientRegistration clientRegistration = createClientRegistration(provider);
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
 
         Map<String, Object> attributes = getKakaoAttribute(name, email);
@@ -177,7 +183,7 @@ public class OAuthServiceTest {
         Map<String, Object> resultAttributes = result.getAttributes();
         assertThat(resultAttributes.get("name")).isEqualTo(name);
         assertThat(resultAttributes.get("email")).isEqualTo(email);
-        assertThat(resultAttributes.get("provider")).isEqualTo("kakao");
+        assertThat(resultAttributes.get("provider")).isEqualTo(provider);
     }
 
     @Test
@@ -186,11 +192,12 @@ public class OAuthServiceTest {
     public void loadNotExistNaverUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String provider = Provider.NAVER.getRegistrationId();
         String email = "hwasowl598@naver.com";
         String name = "박정수";
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration("naver");
+        ClientRegistration clientRegistration = createClientRegistration(provider);
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
         Map<String, Object> attributes = getNaverAttribute(name, email);
         when(oAuth2User.getAttributes()).thenReturn(attributes);
@@ -204,7 +211,7 @@ public class OAuthServiceTest {
         Map<String, Object> resultAttributes = result.getAttributes();
         assertThat(resultAttributes.get("name")).isEqualTo(name);
         assertThat(resultAttributes.get("email")).isEqualTo(email);
-        assertThat(resultAttributes.get("provider")).isEqualTo("naver");
+        assertThat(resultAttributes.get("provider")).isEqualTo(provider);
     }
 
     private User createUser(Long id, String name, String nickname, String email, String provider) {
