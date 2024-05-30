@@ -1,11 +1,12 @@
-package se.sowl.progdomain.user.domain;
+package se.sowl.progdomain.oauth.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import se.sowl.progdomain.user.domain.User;
 
 @Getter
 @Setter
-public class UserProfile {
+public class OAuth2Profile {
     private String name;
     private String email;
     private String provider;

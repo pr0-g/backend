@@ -39,10 +39,4 @@ public class User {
         this.email = email;
         this.provider = provider;
     }
-
-    public User update(String name, String email) {
-        this.name = name;
-        this.email = email;
-        return this;
-    }
 }

@@ -1,7 +1,6 @@
 package se.sowl.progapi.oauth.service;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,21 +30,27 @@ public class OAuthServiceTest {
     @MockBean
     private DefaultOAuth2UserService defaultOAuth2UserService;
 
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+    }
+
     @Test
-    @DisplayName("이미 가입 된 유저인 경우 갱신 후 유저 정보를 응답해야 한다.")
+    @DisplayName("이미 가입된 구글 유저인 경우 유저 정보를 응답해야 한다.")
     @Transactional
-    public void loadExistUser() {
+    public void loadExistGoogleUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        User user = createUser(1L, "박정수", "화솔", "hwasowl598@gmail.com", "google");
+        String email = "hwasowl598@gmail.com";
+        String name = "박정수";
+        User user = createUser(1L, name, "화솔", email, "google");
         userRepository.save(user);
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration();
+        ClientRegistration clientRegistration = createClientRegistration("google");
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
 
-        String updatedName = "박정수(수정됨)";
-        Map<String, Object> attributes = Map.of("sub", "1234567890", "email", "hwasowl598@gmail.com", "name", updatedName);
+        Map<String, Object> attributes = getGoogleAttribute(name, email);
         when(oAuth2User.getAttributes()).thenReturn(attributes);
         when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
 
@@ -55,23 +60,85 @@ public class OAuthServiceTest {
         // then
         assertThat(result).isNotNull();
         Map<String, Object> resultAttributes = result.getAttributes();
-        assertThat(resultAttributes.get("name")).isEqualTo(updatedName);
-        assertThat(resultAttributes.get("email")).isEqualTo("hwasowl598@gmail.com");
+        assertThat(resultAttributes.get("name")).isEqualTo(name);
+        assertThat(resultAttributes.get("email")).isEqualTo(email);
         assertThat(resultAttributes.get("provider")).isEqualTo("google");
     }
 
     @Test
-    @DisplayName("가입하지 않은 유저인 경우 저장 후 유저 정보를 응답해야 한다.")
+    @DisplayName("이미 가입된 카카오 유저인 경우 유저 정보를 응답해야 한다.")
     @Transactional
-    public void loadNotExistUser() {
+    public void loadExistKakaoUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
+        String email = "hwasowl598@kakao.com";
+        String name = "박정수";
+        User user = createUser(2L, name, "화솔", email, "kakao");
+        userRepository.save(user);
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
-        ClientRegistration clientRegistration = createClientRegistration();
+        ClientRegistration clientRegistration = createClientRegistration("kakao");
         OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
 
-        Map<String, Object> attributes = Map.of("sub", "1234567890", "email", "hwasowl598@gmail.com", "name", "박정수");
+        Map<String, Object> attributes = getKakaoAttribute(name, email);
+        when(oAuth2User.getAttributes()).thenReturn(attributes);
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
+
+        // when
+        OAuth2User result = oAuthService.loadUser(userRequest);
+
+        // then
+        assertThat(result).isNotNull();
+        Map<String, Object> resultAttributes = result.getAttributes();
+        assertThat(resultAttributes.get("name")).isEqualTo(name);
+        assertThat(resultAttributes.get("email")).isEqualTo(email);
+        assertThat(resultAttributes.get("provider")).isEqualTo("kakao");
+    }
+
+    @Test
+    @DisplayName("이미 가입된 네이버 유저인 경우 유저 정보를 응답해야 한다.")
+    @Transactional
+    public void loadExistNaverUser() {
+        // given
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        String email = "hwasowl598@naver.com";
+        String name = "박정수";
+        User user = createUser(2L, name, "화솔", email, "naver");
+        userRepository.save(user);
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
+        ClientRegistration clientRegistration = createClientRegistration("naver");
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+        Map<String, Object> attributes = getNaverAttribute(name, email);
+        when(oAuth2User.getAttributes()).thenReturn(attributes);
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
+
+        // when
+        OAuth2User result = oAuthService.loadUser(userRequest);
+
+        // then
+        assertThat(result).isNotNull();
+        Map<String, Object> resultAttributes = result.getAttributes();
+        assertThat(resultAttributes.get("name")).isEqualTo(name);
+        assertThat(resultAttributes.get("email")).isEqualTo(email);
+        assertThat(resultAttributes.get("provider")).isEqualTo("naver");
+    }
+
+    @Test
+    @DisplayName("가입되지 않은 구글 유저가 인증한 경우 회원가입 후 유저 정보를 응답해야 한다.")
+    @Transactional
+    public void loadNotExistGoogleUser() {
+        // given
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        String name = "박정수";
+        String email = "hwasowl598@gmail.com";
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
+        ClientRegistration clientRegistration = createClientRegistration("google");
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+
+        Map<String, Object> attributes = getGoogleAttribute(name, email);
+
         when(oAuth2User.getAttributes()).thenReturn(attributes);
         when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
 
@@ -86,6 +153,60 @@ public class OAuthServiceTest {
         assertThat(resultAttributes.get("provider")).isEqualTo("google");
     }
 
+    @Test
+    @DisplayName("가입되지 않은 카카오 유저가 인증한 경우 회원가입 후 유저 정보를 응답해야 한다.")
+    void loadNotExistKaKaoUser() {
+        // given
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        String email = "hwasowl598@kakao.com";
+        String name = "박정수";
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
+        ClientRegistration clientRegistration = createClientRegistration("kakao");
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+
+        Map<String, Object> attributes = getKakaoAttribute(name, email);
+        when(oAuth2User.getAttributes()).thenReturn(attributes);
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
+
+        // when
+        OAuth2User result = oAuthService.loadUser(userRequest);
+
+        // then
+        assertThat(result).isNotNull();
+        Map<String, Object> resultAttributes = result.getAttributes();
+        assertThat(resultAttributes.get("name")).isEqualTo(name);
+        assertThat(resultAttributes.get("email")).isEqualTo(email);
+        assertThat(resultAttributes.get("provider")).isEqualTo("kakao");
+    }
+
+    @Test
+    @DisplayName("가입하지 않은 네이버 유저가 인증한 경우 유저 정보를 응답해야 한다.")
+    @Transactional
+    public void loadNotExistNaverUser() {
+        // given
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        String email = "hwasowl598@naver.com";
+        String name = "박정수";
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "dummy-access-token", null, null);
+        ClientRegistration clientRegistration = createClientRegistration("naver");
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+        Map<String, Object> attributes = getNaverAttribute(name, email);
+        when(oAuth2User.getAttributes()).thenReturn(attributes);
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
+
+        // when
+        OAuth2User result = oAuthService.loadUser(userRequest);
+
+        // then
+        assertThat(result).isNotNull();
+        Map<String, Object> resultAttributes = result.getAttributes();
+        assertThat(resultAttributes.get("name")).isEqualTo(name);
+        assertThat(resultAttributes.get("email")).isEqualTo(email);
+        assertThat(resultAttributes.get("provider")).isEqualTo("naver");
+    }
+
     private User createUser(Long id, String name, String nickname, String email, String provider) {
         return User.builder()
             .id(id)
@@ -96,8 +217,8 @@ public class OAuthServiceTest {
             .build();
     }
 
-    private ClientRegistration createClientRegistration() {
-        return ClientRegistration.withRegistrationId("google")
+    private ClientRegistration createClientRegistration(String provider) {
+        return ClientRegistration.withRegistrationId(provider)
             .clientId("clientId")
             .clientSecret("clientSecret")
             .scope("email")
@@ -107,7 +228,39 @@ public class OAuthServiceTest {
             .redirectUri("https://test/www.googleapis.com/oauth2/google/redirect")
             .userNameAttributeName("sub")
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .clientName("Google")
+            .clientName(provider)
             .build();
+    }
+
+    private Map<String, Object> getGoogleAttribute(String name, String email) {
+        return Map.of("sub", "1234567890", "email", email, "name", name);
+    }
+
+    private Map<String, Object> getKakaoAttribute(String name, String email) {
+        Map<String, Object> kakaoAccount = Map.of(
+            "profile", Map.of(
+                "nickname", name,
+                "thumbnail_image_url", "http://t1.kakaocdn.net/account_images/default_profile.jpeg.twg.thumb.R110x110",
+                "profile_image_url", "http://t1.kakaocdn.net/account_images/default_profile.jpeg.twg.thumb.R640x640"
+            ),
+            "email", email
+        );
+        return Map.of(
+            "id", "3481867707",
+            "connected_at", "2024-05-14T10:23:03Z",
+            "kakao_account", kakaoAccount
+        );
+    }
+
+    private Map<String, Object> getNaverAttribute(String name, String email) {
+        return Map.of(
+            "response", Map.of(
+                "id", "2P_mzBBdsMUqMAcQQIWdmLM123v2-LVK9yDU2erw1237crNws",
+                "profile_image", "https://ssl.pstatic.net/static/pwe/address/img_profile.png",
+                "name", name,
+                "email", email
+            )
+        );
+
     }
 }
