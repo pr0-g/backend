@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progdomain.oauth.domain.Provider;
+import se.sowl.progdomain.oauth.domain.OAuth2Provider;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class OAuthServiceTest {
     public void loadExistGoogleUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        String provider = Provider.GOOGLE.getRegistrationId();
+        String provider = OAuth2Provider.GOOGLE.getRegistrationId();
         String email = "hwasowl598@gmail.com";
         String name = "박정수";
         User user = createUser(1L, name, "화솔", email, provider);
@@ -73,7 +73,7 @@ public class OAuthServiceTest {
     public void loadExistKakaoUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        String provider = Provider.KAKAO.getRegistrationId();
+        String provider = OAuth2Provider.KAKAO.getRegistrationId();
         String email = "hwasowl598@kakao.com";
         String name = "박정수";
         User user = createUser(2L, name, "화솔", email, provider);
@@ -104,7 +104,7 @@ public class OAuthServiceTest {
     public void loadExistNaverUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        String provider = Provider.NAVER.getRegistrationId();
+        String provider = OAuth2Provider.NAVER.getRegistrationId();
         String email = "hwasowl598@naver.com";
         String name = "박정수";
         User user = createUser(2L, name, "화솔", email, provider);
@@ -134,7 +134,7 @@ public class OAuthServiceTest {
     public void loadNotExistGoogleUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        String provider = Provider.GOOGLE.getRegistrationId();
+        String provider = OAuth2Provider.GOOGLE.getRegistrationId();
         String name = "박정수";
         String email = "hwasowl598@gmail.com";
 
@@ -163,7 +163,7 @@ public class OAuthServiceTest {
     void loadNotExistKaKaoUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        String provider = Provider.KAKAO.getRegistrationId();
+        String provider = OAuth2Provider.KAKAO.getRegistrationId();
         String email = "hwasowl598@kakao.com";
         String name = "박정수";
 
@@ -192,7 +192,7 @@ public class OAuthServiceTest {
     public void loadNotExistNaverUser() {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        String provider = Provider.NAVER.getRegistrationId();
+        String provider = OAuth2Provider.NAVER.getRegistrationId();
         String email = "hwasowl598@naver.com";
         String name = "박정수";
 

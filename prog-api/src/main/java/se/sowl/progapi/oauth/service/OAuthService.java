@@ -10,15 +10,13 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progdomain.oauth.domain.OAuth2Extractor;
-import se.sowl.progdomain.oauth.domain.OAuth2Attribute;
-import se.sowl.progdomain.oauth.domain.OAuth2Profile;
-import se.sowl.progdomain.oauth.domain.Provider;
+import se.sowl.progdomain.oauth.domain.*;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
-import java.util.Map;
 
-import static java.util.Collections.singleton;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,34 +28,31 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = getOAuth2User(oAuth2UserRequest);
-        OAuth2Profile oAuthProfile = extractOAuth2Profile(oAuth2UserRequest, oAuth2User.getAttributes());
-        User user = userRepository.findByEmailAndProvider(oAuthProfile.getEmail(), oAuthProfile.getProvider())
-            .orElseGet(() -> saveUser(oAuthProfile));
-        return createOAuth2User(oAuth2UserRequest, oAuth2User.getAttributes(), oAuthProfile, user);
-    }
-
-    private OAuth2User getOAuth2User(OAuth2UserRequest userRequest) {
-        return oAuth2UserService.loadUser(userRequest);
-    }
-
-    private OAuth2Profile extractOAuth2Profile(OAuth2UserRequest oAuth2UserRequest, Map<String, Object> oAuthUserAttributes) {
         String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();
-        Provider provider = Provider.valueOf(registrationId.toUpperCase());
-        OAuth2Profile OAuthUserProfile = OAuth2Extractor.extract(provider, oAuthUserAttributes);
+        OAuth2User oAuth2User = oAuth2UserService.loadUser(oAuth2UserRequest);
+        OAuth2Profile oAuth2Profile = extractOAuth2Profile(registrationId, oAuth2User.getAttributes());
+        User user = getOrCreateUser(oAuth2Profile);
+        return createOAuth2User(oAuth2UserRequest, oAuth2User.getAttributes(), oAuth2Profile, user);
+    }
+
+    private User getOrCreateUser(OAuth2Profile oAuth2Profile) {
+        return userRepository.findByEmailAndProvider(oAuth2Profile.getEmail(), oAuth2Profile.getProvider())
+            .orElseGet(() -> userRepository.save(oAuth2Profile.toUser()));
+    }
+
+    private OAuth2Profile extractOAuth2Profile(String registrationId, Map<String, Object> oAuth2UserAttributes) {
+        OAuth2Provider provider = OAuth2Provider.valueOf(registrationId.toUpperCase());
+        OAuth2Profile OAuthUserProfile = OAuth2Extractor.extract(provider, oAuth2UserAttributes);
         OAuthUserProfile.setProvider(registrationId);
         return OAuthUserProfile;
     }
 
-    private User saveUser(OAuth2Profile userProfile) {
-        return userRepository.save(userProfile.toUser());
-    }
-
     private OAuth2User createOAuth2User(
-        OAuth2UserRequest userRequest, Map<String, Object> oAuth2UserAttributes, OAuth2Profile userProfile, User user
+        OAuth2UserRequest userRequest, Map<String, Object> oAuth2Attributes, OAuth2Profile userProfile, User user
     ) {
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-        OAuth2Attribute userAttributes = new OAuth2Attribute(oAuth2UserAttributes, userNameAttributeName, userProfile, user.getProvider());
-        return new DefaultOAuth2User(singleton(new SimpleGrantedAuthority("USER")), userAttributes.getAttributes(), userNameAttributeName);
+        OAuth2UserAttribute oAuth2UserAttribute = new OAuth2UserAttribute(oAuth2Attributes, userNameAttributeName, userProfile, user.getProvider());
+        Collection<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(Role.USER.getValue()));
+        return new DefaultOAuth2User(authorities, oAuth2UserAttribute.getAttributes(), userNameAttributeName);
     }
 }
