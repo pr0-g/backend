@@ -40,7 +40,7 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
             .orElseGet(() -> userRepository.save(oAuth2Profile.toUser()));
     }
 
-    private OAuth2Profile extractOAuth2Profile(String registrationId, Map<String, Object> oAuth2UserAttributes) {
+    public OAuth2Profile extractOAuth2Profile(String registrationId, Map<String, Object> oAuth2UserAttributes) {
         OAuth2Provider provider = OAuth2Provider.valueOf(registrationId.toUpperCase());
         OAuth2Profile OAuthUserProfile = OAuth2Extractor.extract(provider, oAuth2UserAttributes);
         OAuthUserProfile.setProvider(registrationId);
@@ -51,7 +51,7 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
         OAuth2UserRequest userRequest, Map<String, Object> oAuth2Attributes, OAuth2Profile userProfile, User user
     ) {
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-        OAuth2UserAttribute oAuth2UserAttribute = new OAuth2UserAttribute(oAuth2Attributes, userNameAttributeName, userProfile, user.getProvider());
+        OAuth2UserAttribute oAuth2UserAttribute = new OAuth2UserAttribute(oAuth2Attributes, userNameAttributeName, userProfile);
         Collection<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(Role.USER.getValue()));
         return new DefaultOAuth2User(authorities, oAuth2UserAttribute.getAttributes(), userNameAttributeName);
     }
