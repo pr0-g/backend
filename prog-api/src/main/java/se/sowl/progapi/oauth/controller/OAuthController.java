@@ -15,7 +15,7 @@ public class OAuthController {
 
     // TODO: nav to main
     // 민종 왔다감.
-    // 안녕하세요 작업중2
+    // 안녕하세요 작업중23
     @GetMapping("/login/info")
     public CommonResponse<String> oauthLoginInfo(Authentication authentication){
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
