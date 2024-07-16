@@ -1,4 +1,4 @@
-package se.sowl.progapi.common;
+package se.sowl.progapi.common.config;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;

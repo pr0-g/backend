@@ -1,6 +1,7 @@
-package se.sowl.progapi.config;
+package se.sowl.progapi.common.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -10,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
+import se.sowl.progapi.oauth.service.OAuthService;
+import se.sowl.progdomain.user.repository.UserRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -17,13 +20,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final OAuthService oAuthService;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/boards/**").authenticated()
+                .requestMatchers("/api/boards/**").authenticated()
+                .requestMatchers("/api/users/**").authenticated()
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
@@ -33,14 +39,14 @@ public class SecurityConfig {
                 .clearAuthentication(true)
             )
             .oauth2Login(oauth2Login -> oauth2Login
-                .defaultSuccessUrl("/oauth2/login/info", true) // TODO: nav to main
-                .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuth2UserService()))
+                .defaultSuccessUrl("/api/users/me", true)
+                .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuthService))
             );
         return http.build();
     }
 
-    @Bean
-    public DefaultOAuth2UserService oAuth2UserService() {
-        return new DefaultOAuth2UserService();
-    }
+//    @Bean
+//    public DefaultOAuth2UserService oAuth2UserService() {
+//        return new DefaultOAuth2UserService();
+//    }
 }
