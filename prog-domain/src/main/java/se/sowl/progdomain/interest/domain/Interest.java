@@ -2,6 +2,7 @@ package se.sowl.progdomain.interest.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,5 +19,7 @@ public class Interest {
     @Column(nullable = false)
     private String name;
 
-
+    public Interest(String name) {
+        this.name = name;
+    }
 }
