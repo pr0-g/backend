@@ -1,4 +1,4 @@
-package se.sowl.progapi.board;
+package se.sowl.progapi.board.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

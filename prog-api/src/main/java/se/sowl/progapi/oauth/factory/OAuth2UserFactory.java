@@ -1,4 +1,4 @@
-package se.sowl.progapi.oauth.service;
+package se.sowl.progapi.oauth.factory;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import se.sowl.progdomain.oauth.domain.OAuth2Profile;
 import se.sowl.progdomain.oauth.domain.OAuth2UserAttribute;
 import se.sowl.progdomain.oauth.domain.Role;
+import se.sowl.progdomain.user.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
 
 import java.util.Collections;
@@ -23,6 +24,10 @@ public class OAuth2UserFactory {
             oAuth2UserAttribute.getAttributes(),
             userNameAttributeName
         );
+    }
+
+    public CustomOAuth2User createCustomOAuth2User(User user, OAuth2User oAuth2User) {
+        return new CustomOAuth2User(user, oAuth2User);
     }
 
     private String getUserNameAttributeName(OAuth2UserRequest userRequest) {

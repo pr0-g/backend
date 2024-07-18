@@ -9,8 +9,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import se.sowl.progapi.oauth.factory.OAuth2UserFactory;
 import se.sowl.progdomain.oauth.domain.*;
-import se.sowl.progdomain.user.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
@@ -26,10 +26,11 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = defaultOAuth2UserService.loadUser(userRequest);
-        OAuth2Profile oAuth2Profile = extractOAuth2Profile(userRequest, oAuth2User);
-        User user = getOrCreateUser(oAuth2Profile);
-        return oAuth2UserFactory.createOAuth2User(userRequest, oAuth2User, oAuth2Profile, user);
+        OAuth2User loadedUser = defaultOAuth2UserService.loadUser(userRequest);
+        OAuth2Profile profile = extractOAuth2Profile(userRequest, loadedUser);
+        User user = getOrCreateUser(profile);
+        OAuth2User oAuth2User = oAuth2UserFactory.createOAuth2User(userRequest, loadedUser, profile, user);
+        return oAuth2UserFactory.createCustomOAuth2User(user, oAuth2User);
     }
 
     private OAuth2Profile extractOAuth2Profile(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
