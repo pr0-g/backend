@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import se.sowl.progdomain.interest.domain.UserInterest;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -27,6 +29,9 @@ public class User {
 
     @Column(nullable = false)
     private String provider;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private Set<UserInterest> userInterest;
 
     @Builder
     public User(Long id, String name, String nickname, String email, String provider) {
