@@ -21,4 +21,12 @@ public class UserService {
     public List<User> getList() {
         return userRepository.findAll();
     }
+
+    @Transactional
+    public void setUserNickname(Long userId, String newNickname) {
+        User user = userRepository.findById(userId).orElseThrow();
+        user.updateNickname(newNickname);
+        userRepository.save(user);
+    }
+
 }

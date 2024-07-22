@@ -65,7 +65,7 @@ class UserInterestServiceTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             userInterestService.updateUserInterests(
                 user.getId(),
-                List.of(interests.getFirst().getId(), nonExistentInterestId)
+                List.of(interests.get(0).getId(), nonExistentInterestId)
             );
         });
         assertThat(exception.getMessage()).contains("존재하지 않는 관심사 ID가 포함되어 있습니다.");
@@ -97,7 +97,7 @@ class UserInterestServiceTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).extracting(ui -> ui.getInterest().getId())
-            .containsExactlyInAnyOrder(interests.getFirst().getId(), interests.get(2).getId());
+            .containsExactlyInAnyOrder(interests.get(0).getId(), interests.get(2).getId());
     }
 
     @Test
@@ -120,7 +120,7 @@ class UserInterestServiceTest {
         assertThat(result).hasSize(3);
         assertThat(result).extracting(ui -> ui.getInterest().getId())
             .containsExactlyInAnyOrder(
-                interests.getFirst().getId(), interests.get(1).getId(), interests.get(2).getId()
+                interests.get(0).getId(), interests.get(1).getId(), interests.get(2).getId()
             );
     }
 

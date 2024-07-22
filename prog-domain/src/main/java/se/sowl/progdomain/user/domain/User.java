@@ -1,7 +1,7 @@
 package se.sowl.progdomain.user.domain;
 
-
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +22,7 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Size(min = 2, max = 15, message = "닉네임은 2자 이상 15자 이하여야 합니다.")
     private String nickname;
 
     @Column(unique = true, nullable = false)
@@ -40,5 +41,12 @@ public class User {
         this.nickname = nickname;
         this.email = email;
         this.provider = provider;
+    }
+
+    public void updateNickname(String nickname) {
+        if (nickname.length() < 2 || nickname.length() > 15) {
+            throw new IllegalArgumentException("닉네임은 2자 이상 15자 이하여야 합니다.");
+        }
+        this.nickname = nickname;
     }
 }
