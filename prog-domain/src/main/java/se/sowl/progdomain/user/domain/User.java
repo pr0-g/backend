@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import se.sowl.progdomain.user.InvalidNicknameException;
 import se.sowl.progdomain.interest.domain.UserInterest;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class User {
 
     public void updateNickname(String nickname) {
         if (nickname.length() < 2 || nickname.length() > 15) {
-            throw new IllegalArgumentException("닉네임은 2자 이상 15자 이하여야 합니다.");
+            throw new InvalidNicknameException("닉네임은 2자 이상 15자 이하여야 합니다.");
         }
         this.nickname = nickname;
     }

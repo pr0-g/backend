@@ -16,7 +16,7 @@ class UserControllerTest {
     @Test
     @DisplayName("수정 요청")
     void editUserCorrectly() {
-        // /api/users/edit 요청을 보내고 응답을 확인한다.
+        // /api/users 요청을 보내고 응답을 확인한다.
         // 코드 작성
 
     }
