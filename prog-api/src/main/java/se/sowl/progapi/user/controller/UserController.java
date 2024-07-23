@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.user.request.EditUserRequest;
 import se.sowl.progapi.user.service.UserService;
-import se.sowl.progdomain.user.domain.CustomOAuth2User;
+import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 
 @RestController
 @RequestMapping("/api/users")
