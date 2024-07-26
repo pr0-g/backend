@@ -1,6 +1,5 @@
 package se.sowl.progapi.user.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -25,8 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,9 +36,6 @@ class UserControllerTest {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private OAuthService oAuthService;
@@ -68,9 +64,10 @@ class UserControllerTest {
         mockMvc.perform(requestBuilder)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value("FAIL"))
-                .andExpect(jsonPath("$.error").value(not(blankOrNullString())))
-                .andExpect(jsonPath("$.result").doesNotExist());
+                .andExpect(jsonPath("$.message").value("닉네임은 2자 이상 15자 이하여야 합니다."))
+                .andExpect(jsonPath("$.result").value(nullValue()));
     }
 
     @Test
@@ -91,11 +88,11 @@ class UserControllerTest {
         mockMvc.perform(requestBuilder)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value("FAIL"))
-                .andExpect(jsonPath("$.error").value(not(blankOrNullString())))
-                .andExpect(jsonPath("$.result").doesNotExist());
+                .andExpect(jsonPath("$.message").value("닉네임은 2자 이상 15자 이하여야 합니다."))
+                .andExpect(jsonPath("$.result").value(nullValue()));
     }
-
 
     @Test
     @WithMockUser

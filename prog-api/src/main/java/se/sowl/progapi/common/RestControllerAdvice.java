@@ -2,23 +2,22 @@ package se.sowl.progapi.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import se.sowl.progdomain.user.InvalidNicknameException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 
 @Slf4j
+@ResponseBody
 @ControllerAdvice
 public class RestControllerAdvice {
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonResponse<Void> handleBadRequest(Exception e) {
-        log.error("Bad Request Exception", e);
+        log.error("BadRequest Exception", e);
         return CommonResponse.fail(e.getMessage());
     }
 
@@ -30,13 +29,9 @@ public class RestControllerAdvice {
     }
 
     @ExceptionHandler(InvalidNicknameException.class)
-    protected ResponseEntity<Object> handleInvalidNickname(InvalidNicknameException ex) {
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("code", "FAIL");
-        body.put("error", ex.getMessage());
-        body.put("result", null);
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonResponse<Object> handleInvalidNickname(InvalidNicknameException e) {
+        log.error("InvalidNicknameException", e);
+        return CommonResponse.fail(e.getMessage());
     }
 }
