@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import se.sowl.progapi.fixture.UserFixture;
 import se.sowl.progapi.user.request.EditUserRequest;
+import se.sowl.progdomain.user.InvalidNicknameException;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
@@ -58,7 +59,7 @@ class UserServiceTest {
         EditUserRequest editUserRequest = new EditUserRequest(newNickname);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidNicknameException.class, () -> {
             userService.editUser(user.getId(), editUserRequest);
         });
 
