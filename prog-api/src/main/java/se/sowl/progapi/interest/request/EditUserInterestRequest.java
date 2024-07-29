@@ -8,15 +8,11 @@ import java.util.List;
 
 @Getter
 @Setter
-public class EditInterestRequest {
+public class EditUserInterestRequest {
     @NotEmpty(message = "관심사 ID 목록은 비어있을 수 없습니다.")
     private List<Long> interestIdList;
 
-    // 기본 생성자
-    public EditInterestRequest() {}
-
-    // 모든 필드를 포함한 생성자
-    public EditInterestRequest(List<Long> interestIdList) {
+    public EditUserInterestRequest(List<Long> interestIdList) {
         this.interestIdList = interestIdList;
     }
 }

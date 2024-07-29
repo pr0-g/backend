@@ -13,7 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import se.sowl.progapi.fixture.UserFixture;
-import se.sowl.progapi.interest.request.EditInterestRequest;
+import se.sowl.progapi.interest.request.EditUserInterestRequest;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.domain.UserInterest;
 import se.sowl.progdomain.interest.repository.InterestRepository;
@@ -75,7 +75,7 @@ class InterestControllerIntegrationTest {
         CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(testUser);
         List<Long> invalidInterestIdList = List.of(999L, 1000L);
 
-        EditInterestRequest request = new EditInterestRequest(invalidInterestIdList);
+        EditUserInterestRequest request = new EditUserInterestRequest(invalidInterestIdList);
 
         mockMvc.perform(put("/api/interests/user/edit")
                         .with(oauth2Login().oauth2User(customOAuth2User))
@@ -95,10 +95,9 @@ class InterestControllerIntegrationTest {
     void editUserInterests() throws Exception {
         CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(testUser);
 
-        // 임의의 관심사 ID 2와 3을 사용
         List<Long> newInterestIdList = Arrays.asList(2L, 3L);
 
-        EditInterestRequest request = new EditInterestRequest(newInterestIdList);
+        EditUserInterestRequest request = new EditUserInterestRequest(newInterestIdList);
 
         ResultActions resultActions = mockMvc.perform(put("/api/interests/user/edit")
                         .with(oauth2Login().oauth2User(customOAuth2User))
@@ -114,12 +113,10 @@ class InterestControllerIntegrationTest {
 
         List<UserInterest> result = userInterestRepository.findAllByUserId(testUser.getId()).get();
 
-        // 결과 확인
         assertThat(result).hasSize(2);
         assertThat(result.stream().map(ui -> ui.getInterest().getId()).collect(Collectors.toList()))
                 .containsExactlyInAnyOrderElementsOf(newInterestIdList);
 
-        // 추가: 실제 관심사 이름 확인
         List<String> resultInterestNames = result.stream()
                 .map(ui -> ui.getInterest().getName())
                 .collect(Collectors.toList());

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
-import se.sowl.progapi.interest.request.EditInterestRequest;
+import se.sowl.progapi.interest.request.EditUserInterestRequest;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 
@@ -33,7 +33,7 @@ public class InterestController {
     @PreAuthorize("isAuthenticated()")
     public CommonResponse<Void> editUserInterests(
             @AuthenticationPrincipal CustomOAuth2User user,
-            @RequestBody EditInterestRequest request) {
+            @RequestBody EditUserInterestRequest request) {
         userInterestService.updateUserInterests(user.getUserId(), request.getInterestIdList());
         return CommonResponse.ok();
     }
