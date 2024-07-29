@@ -1,8 +1,9 @@
-package se.sowl.progdomain.user.domain;
+package se.sowl.progdomain.oauth.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import se.sowl.progdomain.user.domain.User;
 
 import java.util.Collection;
 import java.util.Map;

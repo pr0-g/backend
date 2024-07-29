@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import se.sowl.progdomain.oauth.domain.OAuth2Profile;
 import se.sowl.progdomain.oauth.domain.OAuth2UserAttribute;
 import se.sowl.progdomain.oauth.domain.Role;
-import se.sowl.progdomain.user.domain.CustomOAuth2User;
+import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
 
 import java.util.Collections;
