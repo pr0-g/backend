@@ -20,6 +20,7 @@ import se.sowl.progapi.interest.request.EditUserInterestRequest;
 import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.oauth.service.OAuthService;
+import se.sowl.progapi.utils.TestUtils;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.repository.InterestRepository;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
@@ -37,6 +38,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(InterestController.class)
@@ -62,17 +64,33 @@ public class InterestControllerTest {
     @MockBean
     private InterestRepository interestRepository;
 
-    @BeforeEach
-    void setUp() {
-        interestRepository.deleteAll();
+    @Test
+    @DisplayName("GET /api/interests/list")
+    @WithMockUser(roles = "USER")
+    public void getInterestList() throws Exception {
 
-        interestRepository.saveAll(List.of(
+        List<Interest> interestList = Arrays.asList(
                 new Interest("SF"),
                 new Interest("판타지"),
                 new Interest("로맨스")
-        ));
-    }
+        );
 
+        TestUtils.setSequentialIds(interestList);
+
+        when(interestService.getList()).thenReturn(interestList);
+
+        mockMvc.perform(get("/api/interests/list")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andDo(document("interest-list",
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("result").description("관심사 목록"),
+                                fieldWithPath("result[].id").description("관심사 ID"),
+                                fieldWithPath("result[].name").description("관심사 이름")
+                        )));
+    }
 
     @Nested
     @DisplayName("PUT /api/interests/user/edit")
