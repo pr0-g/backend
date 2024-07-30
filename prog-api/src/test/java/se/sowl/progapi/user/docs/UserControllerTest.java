@@ -60,7 +60,7 @@ public class UserControllerTest {
                     .with(oauth2Login().oauth2User(customOAuth2User))
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"nickname\": \"a\"}"))
+                    .content("{\"nickname\": \"qwerty\"}"))
                 .andExpect(status().isOk())
                 .andDo(document("user-edit",
                     requestFields(
