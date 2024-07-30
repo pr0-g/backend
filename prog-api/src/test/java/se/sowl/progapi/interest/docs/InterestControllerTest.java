@@ -1,7 +1,6 @@
 package se.sowl.progapi.interest.docs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,12 +19,11 @@ import se.sowl.progapi.interest.request.EditUserInterestRequest;
 import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.oauth.service.OAuthService;
-import se.sowl.progapi.utils.TestUtils;
+import se.sowl.progapi.utils.SequentialIdSetter;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.repository.InterestRepository;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
-import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -75,7 +73,7 @@ public class InterestControllerTest {
                 new Interest("로맨스")
         );
 
-        TestUtils.setSequentialIds(interestList);
+        SequentialIdSetter.setSequentialIds(interestList);
 
         when(interestService.getList()).thenReturn(interestList);
 

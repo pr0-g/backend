@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class InterestControllerIntegrationTest {
+class InterestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -122,5 +122,4 @@ class InterestControllerIntegrationTest {
                 .collect(Collectors.toList());
         assertThat(resultInterestNames).containsExactlyInAnyOrder("판타지", "로맨스");
     }
-
 }
