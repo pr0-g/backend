@@ -2,14 +2,14 @@ package se.sowl.progdomain.post.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "likes")
 @Getter
-@Setter
+@Table(name = "likes")
+@RequiredArgsConstructor
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,5 +27,10 @@ public class Like {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    public Like(Long postId, Long userId) {
+        this.postId = postId;
+        this.userId = userId;
     }
 }

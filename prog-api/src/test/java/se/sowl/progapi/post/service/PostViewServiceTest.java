@@ -1,4 +1,4 @@
-package se.sowl.progapi.board.service;
+package se.sowl.progapi.post.service;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

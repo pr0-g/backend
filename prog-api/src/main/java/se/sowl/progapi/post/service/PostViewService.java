@@ -1,4 +1,4 @@
-package se.sowl.progapi.board.service;
+package se.sowl.progapi.post.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
