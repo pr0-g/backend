@@ -1,5 +1,5 @@
 package se.sowl.progapi.post.service;
-
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,8 +13,9 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
-    private final LikeRepository likeRepository;
+    @Getter
     private final RedisTemplate<String, String> redisTemplate;
+    private final LikeRepository likeRepository;
     private final String POST_LIKE_COUNT_PRESET = "post:likes_count:";
 
     @Transactional
@@ -22,14 +23,6 @@ public class LikeService {
         if (!likeRepository.existsByPostIdAndUserId(postId, userId)) {
             likeRepository.save(new Like(postId, userId));
             incrementLikeCount(postId);
-        }
-    }
-
-    @Transactional
-    public void removeLike(Long postId, Long userId) {
-        if (likeRepository.existsByPostIdAndUserId(postId, userId)) {
-            likeRepository.deleteByPostIdAndUserId(postId, userId);
-            decrementLikeCount(postId);
         }
     }
 
@@ -84,8 +77,16 @@ public class LikeService {
         redisTemplate.opsForValue().increment(key);
     }
 
-    private void decrementLikeCount(Long postId) {
-        String key = POST_LIKE_COUNT_PRESET + postId;
-        redisTemplate.opsForValue().decrement(key);
-    }
+//    @Transactional
+//    public void removeLike(Long postId, Long userId) {
+//        if (likeRepository.existsByPostIdAndUserId(postId, userId)) {
+//            likeRepository.deleteByPostIdAndUserId(postId, userId);
+//            decrementLikeCount(postId);
+//        }
+//    }
+
+//    private void decrementLikeCount(Long postId) {
+//        String key = POST_LIKE_COUNT_PRESET + postId;
+//        redisTemplate.opsForValue().decrement(key);
+//    }
 }
