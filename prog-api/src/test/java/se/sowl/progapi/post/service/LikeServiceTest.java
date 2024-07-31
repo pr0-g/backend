@@ -96,6 +96,41 @@ class LikeServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("좋아요 조회")
+    class getLikeCount {
+        @Test
+        @DisplayName("좋아요 수가 호출 횟수만큼 증가해야 한다.")
+        void getLikeCountWithExistPostId() {
+            // given
+            Long postId = 3L;
+            Long userId = 3L;
+            likeService.addLike(postId, userId);
+            Long postId2 = 4L;
+            Long userId2 = 4L;
+            likeService.addLike(postId2, userId2);
+
+            // when
+            long likeCount = likeService.getLikeCount(postId);
+
+            // then
+            assertEquals(1L, likeCount);
+        }
+
+        @Test
+        @DisplayName("저장되지 않은 글 ID로 조회한다면 좋아요 수가 0 이여야만 한다.")
+        void getLikeCountWithNotExistPostId() {
+            // given
+            Long postId = 999L;
+
+            // when
+            long likeCount = likeService.getLikeCount(postId);
+
+            // then
+            assertEquals(0L, likeCount);
+        }
+    }
+
     private static int findAvailablePort() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(0)) {
             return serverSocket.getLocalPort();
