@@ -1,13 +1,17 @@
 package se.sowl.progdomain.post.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "posts")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,11 +20,9 @@ public class Post {
     @Column(nullable = false)
     private String title;
 
-    // TODO: Lazy Fetch 고려하기 (사유: 유저이름 표시)
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // TODO: Lazy Fetch 고려하기 (사유: 관심사명 표시)
     @Column(name = "interest_id", nullable = false)
     private Long interestId;
 
@@ -39,6 +41,20 @@ public class Post {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Builder
+    public Post(String title, Long userId, Long interestId, String thumbnailUrl) {
+        this.title = title;
+        this.userId = userId;
+        this.interestId = interestId;
+        this.thumbnailUrl = thumbnailUrl;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -47,10 +63,5 @@ public class Post {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-    public void softDelete() {
-        this.deleted = true;
-        this.deletedAt = LocalDateTime.now();
     }
 }
