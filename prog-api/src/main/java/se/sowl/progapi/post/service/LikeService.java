@@ -35,36 +35,36 @@ public class LikeService {
         return getLikeCountWithSet(postId, key);
     }
 
-    @Scheduled(fixedRate = 600000)
-    @Transactional
-    public void scheduledSyncLikeCountsToDatabase() {
-        Set<String> keys = redisTemplate.keys(POST_LIKE_COUNT_PRESET + "*");
-        if (keys == null) return;
-        keys.forEach(this::syncSinglePostLikeCount);
-    }
-
-    private void syncSinglePostLikeCount(String key) {
-        Long postId = extractPostIdFromKey(key);
-        Long redisCount = getRedisCount(key);
-        if (redisCount == null) return;
-        updateRedisIfNeeded(key, postId, redisCount);
-    }
-
-    private Long extractPostIdFromKey(String key) {
-        return Long.parseLong(key.split(":")[2]);
-    }
-
-    private Long getRedisCount(String key) {
-        String countStr = redisTemplate.opsForValue().get(key);
-        return countStr != null ? Long.parseLong(countStr) : null;
-    }
-
-    private void updateRedisIfNeeded(String key, Long postId, Long redisCount) {
-        long dbCount = likeRepository.countByPostId(postId);
-        if (redisCount != dbCount) {
-            redisTemplate.opsForValue().set(key, String.valueOf(dbCount));
-        }
-    }
+//    @Scheduled(fixedRate = 600000)
+//    @Transactional
+//    public void scheduledSyncLikeCountsToDatabase() {
+//        Set<String> keys = redisTemplate.keys(POST_LIKE_COUNT_PRESET + "*");
+//        if (keys == null) return;
+//        keys.forEach(this::syncSinglePostLikeCount);
+//    }
+//
+//    private void syncSinglePostLikeCount(String key) {
+//        Long postId = extractPostIdFromKey(key);
+//        Long redisCount = getRedisCount(key);
+//        if (redisCount == null) return;
+//        updateRedisIfNeeded(key, postId, redisCount);
+//    }
+//
+//    private Long extractPostIdFromKey(String key) {
+//        return Long.parseLong(key.split(":")[2]);
+//    }
+//
+//    private Long getRedisCount(String key) {
+//        String countStr = redisTemplate.opsForValue().get(key);
+//        return countStr != null ? Long.parseLong(countStr) : null;
+//    }
+//
+//    private void updateRedisIfNeeded(String key, Long postId, Long redisCount) {
+//        long dbCount = likeRepository.countByPostId(postId);
+//        if (redisCount != dbCount) {
+//            redisTemplate.opsForValue().set(key, String.valueOf(dbCount));
+//        }
+//    }
 
     private long getLikeCountWithSet(Long postId, String key) {
         long count = likeRepository.countByPostId(postId);
