@@ -3,7 +3,7 @@ package se.sowl.progapi.user.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import se.sowl.progapi.user.request.EditUserRequest;
+import se.sowl.progapi.user.dto.EditUserRequest;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 

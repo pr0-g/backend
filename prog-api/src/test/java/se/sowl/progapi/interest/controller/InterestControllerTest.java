@@ -13,7 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import se.sowl.progapi.fixture.UserFixture;
-import se.sowl.progapi.interest.request.EditUserInterestRequest;
+import se.sowl.progapi.interest.dto.EditUserInterestRequest;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.domain.UserInterest;
 import se.sowl.progdomain.interest.repository.InterestRepository;

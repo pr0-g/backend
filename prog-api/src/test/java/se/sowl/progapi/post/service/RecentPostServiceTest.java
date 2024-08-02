@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import se.sowl.progapi.post.dto.RecentPostResponse;
 import se.sowl.progdomain.post.domain.Post;
-import se.sowl.progdomain.post.repository.RecentPostRepository;
+import se.sowl.progdomain.post.repository.PostRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ class RecentPostServiceTest {
     private RecentPostService recentPostService;
 
     @Autowired
-    private RecentPostRepository recentPostRepository;
+    private PostRepository recentPostRepository;
 
     @MockBean
     private LikeService likeService;
@@ -124,6 +124,6 @@ class RecentPostServiceTest {
         assertThat(result.getPosts()).hasSize(10);
         assertThat(result.getPosts()).allMatch(post -> post.getLikeCount() == 10L);
     }
-    
-    
+
+
 }

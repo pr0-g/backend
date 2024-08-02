@@ -42,12 +42,12 @@ public class Post {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Post(String title, Long userId, Long interestId, String thumbnailUrl) {
+    public Post(String title, Long userId, Long interestId, String thumbnailUrl, LocalDateTime createdAt) {
         this.title = title;
         this.userId = userId;
         this.interestId = interestId;
         this.thumbnailUrl = thumbnailUrl;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
     public void softDelete() {

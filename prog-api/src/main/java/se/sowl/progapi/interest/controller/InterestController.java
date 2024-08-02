@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
-import se.sowl.progapi.interest.request.EditUserInterestRequest;
+import se.sowl.progapi.interest.dto.EditUserInterestRequest;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 

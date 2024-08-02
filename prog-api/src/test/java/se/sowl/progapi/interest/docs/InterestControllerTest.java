@@ -15,7 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import se.sowl.progapi.fixture.UserFixture;
 import se.sowl.progapi.interest.controller.InterestController;
-import se.sowl.progapi.interest.request.EditUserInterestRequest;
+import se.sowl.progapi.interest.dto.EditUserInterestRequest;
 import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.oauth.service.OAuthService;
