@@ -1,5 +1,6 @@
 package se.sowl.progapi.post.service;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,10 +18,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class
 TrendingPostService {
+    @Getter
+    private final StringRedisTemplate redisTemplate;
     private final PostViewService postViewService;
     private final LikeService likeService;
     private final PostRepository postRepository;
-    private final StringRedisTemplate redisTemplate;
 
     private static final String TRENDING_POSTS_KEY = "posts:trending";
     private static final int TRENDING_POSTS_COUNT = 100;

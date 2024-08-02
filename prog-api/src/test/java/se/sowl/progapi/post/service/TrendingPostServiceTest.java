@@ -1,21 +1,29 @@
 package se.sowl.progapi.post.service;
 
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import redis.embedded.RedisServer;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,21 +40,45 @@ class TrendingPostServiceTest {
     @Autowired
     private PostRepository postRepository;
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
     @MockBean
     private PostViewService postViewService;
 
     @MockBean
     private LikeService likeService;
 
+    private static RedisServer redisServer;
+    private static int redisPort;
+
+    private static StringRedisTemplate redisTemplate;
+
     private static final String TRENDING_POSTS_KEY = "posts:trending";
+
+    @BeforeAll
+    static void setUpRedisServer() throws IOException {
+        redisPort = findAvailablePort();
+        redisServer = RedisServer.builder()
+                .port(redisPort)
+                .setting("maxmemory 128M")
+                .build();
+        redisServer.start();
+    }
+
+    @AfterAll
+    static void tearDownRedisServer() {
+        if (redisServer != null) {
+            redisServer.stop();
+        }
+    }
+
 
     @BeforeEach
     void setUp() {
+        redisTemplate = trendingPostService.getRedisTemplate();
+        Objects.requireNonNull(redisTemplate.getConnectionFactory())
+                .getConnection()
+                .serverCommands()
+                .flushAll();
         postRepository.deleteAll();
-        redisTemplate.delete(TRENDING_POSTS_KEY);
         when(postViewService.getViewCount(anyLong())).thenReturn(0L);
         when(likeService.getLikeCount(anyLong())).thenReturn(0L);
     }
@@ -158,5 +190,26 @@ class TrendingPostServiceTest {
             posts.add(post);
         }
         return postRepository.saveAll(posts);
+    }
+
+    private static int findAvailablePort() throws IOException {
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
+            return serverSocket.getLocalPort();
+        }
+    }
+
+    @DynamicPropertySource
+    static void redisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.port", () -> redisPort);
+        registry.add("spring.data.redis.host", () -> "localhost");
+    }
+
+    @TestConfiguration
+    static class TestRedisConfiguration {
+        @Bean
+        public RedisConnectionFactory redisConnectionFactory() {
+            RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration("localhost", redisPort);
+            return new LettuceConnectionFactory(configuration);
+        }
     }
 }
