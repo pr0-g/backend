@@ -2,13 +2,10 @@ package se.sowl.progapi.post.service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import se.sowl.progdomain.post.domain.Like;
 import se.sowl.progdomain.post.repository.LikeRepository;
-
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor

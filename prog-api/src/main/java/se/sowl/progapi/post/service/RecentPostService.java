@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import se.sowl.progapi.post.dto.RecentPostResponse;
 import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Post;
-import se.sowl.progdomain.post.repository.RecentPostRepository;
+import se.sowl.progdomain.post.repository.PostRepository;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecentPostService {
 
-    private final RecentPostRepository recentPostRepository;
+    private final PostRepository recentPostRepository;
     private final LikeService likeService;
 
     @Transactional(readOnly = true)

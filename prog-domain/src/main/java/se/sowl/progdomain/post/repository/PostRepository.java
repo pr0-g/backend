@@ -5,6 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import se.sowl.progdomain.post.domain.Post;
 
-public interface RecentPostRepository extends JpaRepository<Post, Long> {
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    List<Post> findByCreatedAtBefore(LocalDateTime oneMonthAgo);
 }
