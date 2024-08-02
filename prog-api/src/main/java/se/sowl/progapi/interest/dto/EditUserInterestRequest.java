@@ -1,10 +1,9 @@
-package se.sowl.progapi.interest.request;
+package se.sowl.progapi.interest.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
