@@ -16,12 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecentPostService {
 
-    private final PostRepository recentPostRepository;
+    private final PostRepository postRepository;
     private final LikeService likeService;
 
     @Transactional(readOnly = true)
     public RecentPostResponse getRecentPosts(Pageable pageable) {
-        Page<Post> postsPage = recentPostRepository.findAllByDeletedFalseOrderByCreatedAtDesc(pageable);
+        Page<Post> postsPage = postRepository.findAllByDeletedFalseOrderByCreatedAtDesc(pageable);
         List<PostSummary> postSummaries = this.getPostSummary(postsPage);
         return RecentPostResponse.from(postSummaries, postsPage.getTotalElements(), postsPage.getTotalPages());
     }
