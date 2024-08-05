@@ -47,4 +47,3 @@ public class PostController {
         return CommonResponse.ok(trendingPosts);
     }
 }
-

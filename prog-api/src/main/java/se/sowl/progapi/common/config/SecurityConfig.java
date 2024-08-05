@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/boards/**").authenticated()
                 .requestMatchers("/api/users/**").authenticated()
                 .requestMatchers("/api/interests/**").authenticated()
+                .requestMatchers("/api/posts/**").authenticated()
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
