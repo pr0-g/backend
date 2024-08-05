@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progapi.post.dto.LikedPostResponse;
 import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Like;
 import se.sowl.progdomain.post.domain.Post;
@@ -20,23 +19,13 @@ public class LikedPostService {
 
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
-    private final LikeService likeService;
+    private final PostService postService;
 
     @Transactional(readOnly = true)
-    public LikedPostResponse getLikedPosts(Long userId, Pageable pageable) {
+    public Page<PostSummary> getLikedPosts(Long userId, Pageable pageable) {
         Page<Like> likesPage = likeRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
-        List<PostSummary> posts = getLikedPostSummary(likesPage);
-        return LikedPostResponse.from(posts, likesPage.getTotalElements(), likesPage.getTotalPages());
-    }
-
-    private List<PostSummary> getLikedPostSummary(Page<Like> likesPage) {
         List<Long> postIds = likesPage.getContent().stream().map(Like::getPostId).toList();
-        List<Post> posts = postRepository.findAllByIdInAndDeletedFalse(postIds);
-        return posts.stream()
-                .map(post -> {
-                    long likeCount = likeService.getLikeCount(post.getId());
-                    return PostSummary.from(post, likeCount);
-                })
-                .toList();
+        Page<Post> posts = postRepository.findAllByIdInAndDeletedFalse(postIds, pageable);
+        return postService.toPagePostSummary(posts);
     }
 }

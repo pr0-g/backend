@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progapi.post.dto.RecentPostResponse;
+import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -62,17 +63,17 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        RecentPostResponse result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
-        assertThat(result.getPosts()).hasSize(10);
+        assertThat(result.getContent()).hasSize(10);
         assertThat(result.getTotalElements()).isEqualTo(50);
         assertThat(result.getTotalPages()).isEqualTo(5);
 
-        assertThat(result.getPosts())
+        assertThat(result.getContent())
                 .isSortedAccordingTo((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()));
 
-        assertThat(result.getPosts()).allMatch(post ->
+        assertThat(result.getContent()).allMatch(post ->
                 post.getThumbnailUrl().startsWith("http://example.com/thumbnail") &&
                         post.getLikeCount() == 10L
         );
@@ -85,10 +86,10 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        RecentPostResponse result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
-        assertThat(result.getPosts()).isEmpty();
+        assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isZero();
         assertThat(result.getTotalPages()).isZero();
     }
@@ -102,11 +103,11 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        RecentPostResponse result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
-        assertThat(result.getPosts()).hasSize(10);
-        assertThat(result.getPosts()).allMatch(post -> post.getLikeCount() == 0L);
+        assertThat(result.getContent()).hasSize(10);
+        assertThat(result.getContent()).allMatch(post -> post.getLikeCount() == 0L);
     }
 
     @Test
@@ -118,12 +119,12 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        RecentPostResponse result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
-        assertThat(result.getPosts()).hasSize(10);
-        assertThat(result.getPosts()).allMatch(post -> post.getLikeCount() == 10L);
+        assertThat(result.getContent()).hasSize(10);
+        assertThat(result.getContent()).allMatch(post -> post.getLikeCount() == 10L);
     }
-    
-    
+
+
 }

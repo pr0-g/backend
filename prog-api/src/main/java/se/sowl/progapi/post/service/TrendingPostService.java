@@ -2,9 +2,12 @@ package se.sowl.progapi.post.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -16,12 +19,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class
-TrendingPostService {
+public class TrendingPostService {
     @Getter
     private final StringRedisTemplate redisTemplate;
     private final PostViewService postViewService;
     private final LikeService likeService;
+    private final PostService postService;
     private final PostRepository postRepository;
 
     private static final String TRENDING_POSTS_KEY = "posts:trending";
@@ -35,11 +38,10 @@ TrendingPostService {
         redisTemplate.opsForZSet().removeRange(TRENDING_POSTS_KEY, 0, -TRENDING_POSTS_COUNT - 1);
     }
 
-    public List<Post> getTrendingPosts(int page, int size) {
-        long start = (long) page * size;
-        long end = start + size - 1;
-        List<Long> postIdList = this.getPostIds(start, end);
-        return postRepository.findAllById(postIdList);
+    public Page<PostSummary> getTrendingPosts(Pageable pageable) {
+        List<Long> postIdList = this.getPostIds(pageable.getPageNumber(), pageable.getPageSize());
+        Page<Post> postPages = postRepository.findAllByIdInAndDeletedFalse(postIdList, pageable);
+        return postService.toPagePostSummary(postPages);
     }
 
     private List<Long> getPostIds(long start, long end) {
@@ -47,9 +49,7 @@ TrendingPostService {
         if (postIds == null || postIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return postIds.stream()
-            .map(Long::parseLong)
-            .collect(Collectors.toList());
+        return postIds.stream().map(Long::parseLong).collect(Collectors.toList());
     }
 
     private double getScore(Long postId) {

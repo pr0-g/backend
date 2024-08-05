@@ -7,6 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -14,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import redis.embedded.RedisServer;
+import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -97,19 +101,23 @@ class TrendingPostServiceTest {
                 when(likeService.getLikeCount(post.getId())).thenReturn(50L);
                 trendingPostService.updatePostScore(post.getId());
             }
+            Pageable pageable = PageRequest.of(0, 10);
 
             // when
-            List<Post> result = trendingPostService.getTrendingPosts(0, 10);
+            Page<PostSummary> result = trendingPostService.getTrendingPosts(pageable);
 
             // then
-            assertThat(result).hasSize(10);
+            assertThat(result.getContent()).hasSize(10);
         }
 
         @Test
         @DisplayName("트렌딩 게시물이 없는 경우 빈 리스트를 반환한다")
         void getTrendingPostsWhenNoPostsExist() {
-            // given && when
-            List<Post> result = trendingPostService.getTrendingPosts(0, 10);
+            // given
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // when
+            Page<PostSummary> result = trendingPostService.getTrendingPosts(pageable);
 
             // then
             assertThat(result).isEmpty();

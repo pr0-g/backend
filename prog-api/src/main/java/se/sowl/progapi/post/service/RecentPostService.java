@@ -5,33 +5,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progapi.post.dto.RecentPostResponse;
 import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RecentPostService {
 
     private final PostRepository postRepository;
-    private final LikeService likeService;
+    private final PostService postService;
 
     @Transactional(readOnly = true)
-    public RecentPostResponse getRecentPosts(Pageable pageable) {
+    public Page<PostSummary> getRecentPosts(Pageable pageable) {
         Page<Post> postsPage = postRepository.findAllByDeletedFalseOrderByCreatedAtDesc(pageable);
-        List<PostSummary> postSummaries = this.getPostSummary(postsPage);
-        return RecentPostResponse.from(postSummaries, postsPage.getTotalElements(), postsPage.getTotalPages());
-    }
-
-    public List<PostSummary> getPostSummary(Page<Post> pages) {
-        return pages.getContent().stream()
-                .map(post -> {
-                    long likeCount = likeService.getLikeCount(post.getId());
-                    return PostSummary.from(post, likeCount);
-                })
-                .toList();
+        return postService.toPagePostSummary(postsPage);
     }
 }
