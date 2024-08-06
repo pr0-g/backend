@@ -63,3 +63,33 @@ include::{snippets}/interest-edit-fail/request-fields.adoc[]
 
 === 응답
 include::{snippets}/interest-edit-fail/http-response.adoc[]
+
+== 트렌딩 목록 조회
+
+== * 조회에 성공한 경우
+
+=== 요청
+include::{snippets}/get-trending-posts/http-request.adoc[]
+
+=== 응답
+include::{snippets}/get-trending-posts/http-response.adoc[]
+
+== 최신 목록 조회
+
+== * 조회에 성공한 경우
+
+=== 요청
+include::{snippets}/get-recent-posts/http-request.adoc[]
+
+=== 응답
+include::{snippets}/get-recent-posts/http-response.adoc[]
+
+== 유저가 좋아요한 목록 조회
+
+== * 조회에 성공한 경우
+
+=== 요청
+include::{snippets}/get-liked-posts/http-request.adoc[]
+
+=== 응답
+include::{snippets}/get-liked-posts/http-response.adoc[]

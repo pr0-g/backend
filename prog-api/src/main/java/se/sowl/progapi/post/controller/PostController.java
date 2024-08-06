@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.post.dto.PostSummary;
@@ -39,8 +40,8 @@ public class PostController {
 
     @GetMapping("/liked")
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<Page<PostSummary>> getRecentPost(
-        @RequestParam("page") int page, @RequestParam("size") int size, CustomOAuth2User user
+    public CommonResponse<Page<PostSummary>> getLikedPost(
+        @AuthenticationPrincipal CustomOAuth2User user, @RequestParam("page") int page, @RequestParam("size") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<PostSummary> trendingPosts = likedPostService.getLikedPosts(user.getUserId(), pageable);
