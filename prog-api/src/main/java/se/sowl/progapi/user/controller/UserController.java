@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.user.dto.EditUserRequest;
 import se.sowl.progapi.user.service.UserService;
@@ -27,7 +24,7 @@ public class UserController {
 
     @PutMapping("/edit")
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<Void> editUser(@AuthenticationPrincipal CustomOAuth2User user, @Valid EditUserRequest request) {
+    public CommonResponse<Void> editUser(@AuthenticationPrincipal CustomOAuth2User user, @Valid @RequestBody EditUserRequest request) {
         userService.editUser(user.getUserId(), request);
         return CommonResponse.ok();
     }
