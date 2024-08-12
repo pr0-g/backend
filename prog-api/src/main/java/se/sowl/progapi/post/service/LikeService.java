@@ -76,7 +76,9 @@ public class LikeService {
 
 //    @Transactional
 //    public void removeLike(Long postId, Long userId) {
-//        if (likeRepository.existsByPostIdAndUserId(postId, userId)) {
+//        if (
+//          likeRepository.existsByPostIdAndUserId(postId, userId)
+//        ) {
 //            likeRepository.deleteByPostIdAndUserId(postId, userId);
 //            decrementLikeCount(postId);
 //        }
