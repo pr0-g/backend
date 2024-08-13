@@ -1,5 +1,6 @@
 package se.sowl.progdomain.oauth.domain;
 
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -30,5 +31,9 @@ public class CustomOAuth2User implements OAuth2User {
 
     public Long getUserId() {
         return user.getId();
+    }
+
+    public @Size(min = 2, max = 15, message = "닉네임은 2자 이상 15자 이하여야 합니다.") String getNickname() {
+        return user.getNickname();
     }
 }
