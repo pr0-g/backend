@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
+import se.sowl.progapi.interest.dto.UserInterestRequest;
 import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.interest.dto.EditUserInterestRequest;
@@ -27,6 +28,13 @@ public class InterestController {
     public CommonResponse<List<Interest>> getInterestList() {
         List<Interest> interestList = interestService.getList();
         return CommonResponse.ok(interestList);
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("isAuthenticated()")
+    public CommonResponse<List<UserInterestRequest>> getUserInterests(@AuthenticationPrincipal CustomOAuth2User user) {
+        List<UserInterestRequest> userInterests = userInterestService.getUserInterests(user.getUserId());
+        return CommonResponse.ok(userInterests);
     }
 
     @PutMapping("/user/edit")

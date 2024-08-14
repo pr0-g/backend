@@ -2,10 +2,10 @@ package se.sowl.progapi.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import se.sowl.progdomain.interest.domain.UserInterest;
+import se.sowl.progapi.interest.dto.UserInterestRequest;
 
-import java.util.Set;
+import java.util.List;
+
 
 @Getter
 @AllArgsConstructor
@@ -15,5 +15,5 @@ public class UserInfoRequest {
     private String name;
     private String nickname;
     private String provider;
-    private Set<UserInterest> userInterests;
+    private List<UserInterestRequest> interests;
 }

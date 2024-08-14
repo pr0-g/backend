@@ -3,6 +3,7 @@ package se.sowl.progapi.interest.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import se.sowl.progapi.interest.dto.UserInterestRequest;
 import se.sowl.progapi.user.exception.UserNotExistException;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.domain.UserInterest;
@@ -21,6 +22,14 @@ public class UserInterestService {
     private final UserInterestRepository userInterestRepository;
     private final UserRepository userRepository;
     private final InterestRepository interestRepository;
+
+    @Transactional
+    public List<UserInterestRequest> getUserInterests(Long userId) {
+        List<UserInterest> userInterests = userInterestRepository.findAllByUserId(userId).orElseThrow(UserNotExistException::new);
+        return userInterests.stream()
+                .map(ui -> new UserInterestRequest(ui.getInterest().getId(), ui.getInterest().getName()))
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public void updateUserInterests(Long userId, List<Long> interestIdList){
