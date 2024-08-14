@@ -6,6 +6,17 @@
 :toclevels: 2
 :sectlinks:
 
+== 사용자 정보 조회
+
+== * 조회에 성공한 경우
+
+=== 요청
+include::{snippets}/user-me/http-request.adoc[]
+
+=== 응답
+include::{snippets}/user-me/http-response.adoc[]
+
+
 == 사용자 정보 수정
 
 == * 수정에 성공한 경우
