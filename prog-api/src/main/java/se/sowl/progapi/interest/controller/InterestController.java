@@ -30,13 +30,6 @@ public class InterestController {
         return CommonResponse.ok(interestList);
     }
 
-    @GetMapping("/user")
-    @PreAuthorize("isAuthenticated()")
-    public CommonResponse<List<UserInterestRequest>> getUserInterests(@AuthenticationPrincipal CustomOAuth2User user) {
-        List<UserInterestRequest> userInterests = userInterestService.getUserInterests(user.getUserId());
-        return CommonResponse.ok(userInterests);
-    }
-
     @PutMapping("/user/edit")
     @PreAuthorize("isAuthenticated()")
     public CommonResponse<Void> editUserInterests(

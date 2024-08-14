@@ -6,12 +6,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
+import se.sowl.progapi.interest.dto.UserInterestRequest;
+import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.user.dto.EditUserRequest;
 import se.sowl.progapi.user.dto.UserInfoRequest;
 import se.sowl.progapi.user.service.UserService;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserInterestService userInterestService;
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -33,4 +37,12 @@ public class UserController {
         userService.editUser(user.getUserId(), request);
         return CommonResponse.ok();
     }
+
+    @GetMapping("/interests")
+    @PreAuthorize("isAuthenticated()")
+    public CommonResponse<List<UserInterestRequest>> getUserInterests(@AuthenticationPrincipal CustomOAuth2User user) {
+        List<UserInterestRequest> userInterests = userInterestService.getUserInterests(user.getUserId());
+        return CommonResponse.ok(userInterests);
+    }
+
 }
