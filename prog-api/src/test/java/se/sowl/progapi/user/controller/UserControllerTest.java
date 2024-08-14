@@ -9,10 +9,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import se.sowl.progapi.fixture.UserFixture;
 import se.sowl.progapi.interest.dto.UserInterestRequest;
+import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.oauth.service.OAuthService;
 import se.sowl.progapi.user.dto.UserInfoRequest;
 import se.sowl.progapi.user.service.UserService;
@@ -32,6 +34,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -48,9 +51,11 @@ public class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private UserInterestService userInterestService;
 
     @Nested
-    @DisplayName("PUT /api/users/me")
+    @DisplayName("GET /api/users/me")
     class GetMe {
         @Test
         @DisplayName("인증된 사용자의 정보를 조회할 수 있다")
@@ -161,6 +166,92 @@ public class UserControllerTest {
                         fieldWithPath("message").description("응답 메시지"),
                         fieldWithPath("result").description("결과")
                     )));
+        }
+    }
+
+    @Test
+    @DisplayName("인증된 사용자의 관심사 목록을 조회할 수 있다")
+    @WithMockUser(roles = "USER")
+    public void getUserInterestsSuccess() throws Exception {
+        // given
+        Long userId = 1L;
+        User fixtureUser = UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google");
+        CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
+
+        List<UserInterestRequest> interests = Arrays.asList(
+                new UserInterestRequest(1L, "Technology"),
+                new UserInterestRequest(2L, "Travel")
+        );
+
+        when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
+        when(userInterestService.getUserInterests(eq(userId))).thenReturn(interests);
+
+        // when & then
+        mockMvc.perform(get("/api/users/interests")
+                        .with(oauth2Login().oauth2User(customOAuth2User))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("SUCCESS"))
+                .andExpect(jsonPath("$.message").value("성공"))
+                .andExpect(jsonPath("$.result").isArray())
+                .andExpect(jsonPath("$.result.length()").value(2))
+                .andExpect(jsonPath("$.result[0].id").value(1))
+                .andExpect(jsonPath("$.result[0].name").value("Technology"))
+                .andExpect(jsonPath("$.result[1].id").value(2))
+                .andExpect(jsonPath("$.result[1].name").value("Travel"))
+                .andDo(document("user-interests",
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("result").description("사용자 관심사 목록"),
+                                fieldWithPath("result[].id").description("관심사 ID"),
+                                fieldWithPath("result[].name").description("관심사 이름")
+                        )
+                ));
+    }
+
+    @Nested
+    @DisplayName("GET /api/users/intrests")
+    class GetUserInterests {
+        @Test
+        @DisplayName("인증된 사용자의 관심사 목록을 조회할 수 있다")
+        @WithMockUser(roles = "USER")
+        public void getUserInterestsSuccess() throws Exception {
+            // given
+            Long userId = 1L;
+            User fixtureUser = UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google");
+            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
+
+            List<UserInterestRequest> interests = Arrays.asList(
+                    new UserInterestRequest(1L, "Technology"),
+                    new UserInterestRequest(2L, "Travel")
+            );
+
+            when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
+            when(userInterestService.getUserInterests(eq(userId))).thenReturn(interests);
+
+            // when & then
+            mockMvc.perform(get("/api/users/interests")
+                            .with(oauth2Login().oauth2User(customOAuth2User))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value("SUCCESS"))
+                    .andExpect(jsonPath("$.message").value("성공"))
+                    .andExpect(jsonPath("$.result").isArray())
+                    .andExpect(jsonPath("$.result.length()").value(2))
+                    .andExpect(jsonPath("$.result[0].id").value(1))
+                    .andExpect(jsonPath("$.result[0].name").value("Technology"))
+                    .andExpect(jsonPath("$.result[1].id").value(2))
+                    .andExpect(jsonPath("$.result[1].name").value("Travel"))
+                    .andDo(document("user-interests",
+                            responseFields(
+                                    fieldWithPath("code").description("응답 코드"),
+                                    fieldWithPath("message").description("응답 메시지"),
+                                    fieldWithPath("result").description("사용자 관심사 목록"),
+                                    fieldWithPath("result[].id").description("관심사 ID"),
+                                    fieldWithPath("result[].name").description("관심사 이름")
+                            )
+                    ));
         }
     }
 }
