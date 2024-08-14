@@ -8,14 +8,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import se.sowl.progapi.common.CommonResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/oauth2")
 public class OAuthController {
 
     @GetMapping("/login/info")
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<Void> getMe(@AuthenticationPrincipal OAuth2User user) {
-        System.out.println(user.getAttributes());
-        return CommonResponse.ok();
+    public CommonResponse<Map<String, Object>> getMe(@AuthenticationPrincipal OAuth2User user) {
+        if (user == null) {
+            return CommonResponse.ok(Map.of("isLoggedIn", false));
+        }
+        Map<String, Object> sessionInfo = new HashMap<>();
+        sessionInfo.put("isLoggedIn", true);
+        sessionInfo.put("user", user.getAttributes());
+        return CommonResponse.ok(sessionInfo);
     }
 }
