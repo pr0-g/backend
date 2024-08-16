@@ -1,11 +1,16 @@
 package se.sowl.progapi.post.service;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import se.sowl.progdomain.post.domain.Like;
+import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.LikeRepository;
+import se.sowl.progdomain.post.repository.PostRepository;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -13,14 +18,26 @@ public class LikeService {
     @Getter
     private final RedisTemplate<String, String> redisTemplate;
     private final LikeRepository likeRepository;
+    private final PostRepository postRepository;
     private final String POST_LIKE_COUNT_PRESET = "post:likes_count:";
 
     @Transactional
-    public void addLike(Long postId, Long userId) {
-        if (!likeRepository.existsByPostIdAndUserId(postId, userId)) {
-            likeRepository.save(new Like(postId, userId));
-            incrementLikeCount(postId);
-        }
+    public boolean toggleLike(Long postId, Long userId) {
+        return likeRepository.findByPostIdAndUserId(postId, userId)
+                .map(like -> {
+                    likeRepository.delete(like);
+                    updateLikeCountCache(postId, -1);
+                    return false;
+                })
+                .orElseGet(() -> {
+                    likeRepository.save(new Like(postId, userId));
+                    updateLikeCountCache(postId, 1);
+                    return true;
+                });
+    }
+
+    public boolean hasUserLiked(Long postId, Long userId) {
+        return likeRepository.existsByPostIdAndUserId(postId, userId);
     }
 
     public long getLikeCount(Long postId) {
@@ -30,6 +47,12 @@ public class LikeService {
             return Long.parseLong(cachedCount);
         }
         return getLikeCountWithSet(postId, key);
+    }
+
+
+    private void updateLikeCountCache(Long postId, int delta) {
+        String key = POST_LIKE_COUNT_PRESET + postId;
+        redisTemplate.opsForValue().increment(key, delta);
     }
 
 //    @Scheduled(fixedRate = 600000)
