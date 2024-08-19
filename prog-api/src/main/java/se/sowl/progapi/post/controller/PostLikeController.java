@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.post.dto.LikeRequest;
+import se.sowl.progapi.post.dto.LikeResponse;
 import se.sowl.progapi.post.service.LikeService;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/posts/like")
@@ -22,7 +21,7 @@ public class PostLikeController {
 
     @PutMapping
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<LikeRequest> toggleLike(
+    public CommonResponse<LikeResponse> toggleLike(
             @AuthenticationPrincipal CustomOAuth2User user,
             @RequestBody LikeRequest request
     ) {
@@ -32,7 +31,7 @@ public class PostLikeController {
 
         boolean isLiked = likeService.toggleLike(request.getPostId(), user.getUserId());
         long likeCount = likeService.getLikeCount(request.getPostId());
-        LikeRequest response = LikeRequest.createResponse(request.getPostId(), isLiked, likeCount);
+        LikeResponse response = LikeResponse.createResponse(request.getPostId(), isLiked, likeCount);
         return CommonResponse.ok(response);
     }
 

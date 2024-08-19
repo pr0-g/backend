@@ -10,8 +10,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LikeRequest {
+public class LikeResponse {
     @NotNull(message = "게시물 ID는 필수입니다.")
     private Long postId;
+    private boolean liked;
+    private long likeCount;
 
+    public static LikeResponse createResponse(Long postId, boolean liked, long likeCount) {
+        return new LikeResponse(postId, liked, likeCount);
+    }
 }
