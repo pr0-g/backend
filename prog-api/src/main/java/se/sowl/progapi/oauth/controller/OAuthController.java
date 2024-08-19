@@ -28,7 +28,6 @@ public class OAuthController {
         this.userInterestService = userInterestService;
     }
 
-
     @GetMapping("/login/info")
     @PreAuthorize("isAuthenticated()")
     public CommonResponse<Map<String, Object>> getMe(@AuthenticationPrincipal OAuth2User user) {
@@ -38,14 +37,19 @@ public class OAuthController {
         Map<String, Object> sessionInfo = new HashMap<>();
         sessionInfo.put("isLoggedIn", true);
 
-        Map<String, Object> userInfo = user.getAttributes();
-        Long userId = Long.parseLong(userInfo.get("sub").toString());
-
+        Long userId = Long.parseLong(user.getAttribute("sub"));
         UserInfoRequest userInfoRequest = userService.getUserInfo(userId);
         List<UserInterestRequest> interests = userInterestService.getUserInterests(userId);
 
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", userInfoRequest.getUserId());
+        userInfo.put("email", userInfoRequest.getEmail());
+        userInfo.put("name", userInfoRequest.getName());
+        userInfo.put("nickname", userInfoRequest.getNickname());
+        userInfo.put("provider", userInfoRequest.getProvider());
         userInfo.put("interests", interests);
-        sessionInfo.put("user", userInfoRequest);
+
+        sessionInfo.put("user", userInfo);
 
         return CommonResponse.ok(sessionInfo);
     }
