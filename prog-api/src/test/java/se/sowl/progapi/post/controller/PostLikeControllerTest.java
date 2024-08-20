@@ -1,6 +1,8 @@
 package se.sowl.progapi.post.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 @WebMvcTest(PostLikeController.class)
 @AutoConfigureRestDocs
 @ExtendWith(RestDocumentationExtension.class)
@@ -48,6 +49,17 @@ class PostLikeControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private User testUser;
+    private CustomOAuth2User customOAuth2User;
+    private static final Long TEST_POST_ID = 1L;
+
+    @BeforeEach
+    void setUp() {
+        testUser = UserFixture.createUser(1L, "테스트", "테스트유저", "test@example.com", "naver");
+        customOAuth2User = UserFixture.createCustomOAuth2User(testUser);
+        when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
+    }
+
     @Nested
     @DisplayName("PUT /api/posts/like")
     class ToggleLike {
@@ -55,20 +67,13 @@ class PostLikeControllerTest {
         @Test
         @DisplayName("좋아요 토글 성공")
         @WithMockUser(roles = "USER")
-        public void toggleLikeSuccess() throws Exception {
-            // Given
-            User fixtureUser = UserFixture.createUser(1L, "테스트", "테스트유저", "test@example.com", "naver");
-            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
-            when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
+        void toggleLikeSuccess() throws Exception {
+            when(likeService.toggleLike(eq(TEST_POST_ID), eq(testUser.getId()))).thenReturn(true);
+            when(likeService.getLikeCount(eq(TEST_POST_ID))).thenReturn(1L);
 
-            Long postId = 1L;
-            when(likeService.toggleLike(eq(postId), eq(fixtureUser.getId()))).thenReturn(true);
-            when(likeService.getLikeCount(eq(postId))).thenReturn(1L);
-
-            LikeRequest request = new LikeRequest(postId);
+            LikeRequest request = new LikeRequest(TEST_POST_ID);
             String content = objectMapper.writeValueAsString(request);
 
-            // When & Then
             mockMvc.perform(put("/api/posts/like")
                             .with(oauth2Login().oauth2User(customOAuth2User))
                             .with(csrf())
@@ -76,14 +81,12 @@ class PostLikeControllerTest {
                             .content(content))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.postId").value(postId))
+                    .andExpect(jsonPath("$.result.postId").value(TEST_POST_ID))
                     .andExpect(jsonPath("$.result.liked").value(true))
                     .andExpect(jsonPath("$.result.likeCount").value(1))
                     .andDo(document("posts-like-toggle",
                             requestFields(
-                                    fieldWithPath("postId").description("좋아요를 토글할 게시물 ID"),
-                                    fieldWithPath("liked").description("좋아요 상태 (요청 시 무시됨)").optional().ignored(),
-                                    fieldWithPath("likeCount").description("좋아요 수 (요청 시 무시됨)").optional().ignored()
+                                    fieldWithPath("postId").description("좋아요를 토글할 게시물 ID")
                             ),
                             responseFields(
                                     fieldWithPath("code").description("응답 코드"),
@@ -95,14 +98,13 @@ class PostLikeControllerTest {
         }
 
         @Test
-        @DisplayName("잘못된 요청으로 인한 좋아요 토글 실패")
+        @DisplayName("존재하지 않는 게시물에 대한 좋아요 토글 실패")
         @WithMockUser(roles = "USER")
-        public void toggleLikeInvalidRequest() throws Exception {
-            User fixtureUser = UserFixture.createUser(1L, "테스트", "테스트유저", "test@example.com", "naver");
-            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
-            when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
+        void toggleLikeNonExistentPost() throws Exception {
+            when(likeService.toggleLike(eq(TEST_POST_ID), eq(testUser.getId())))
+                    .thenThrow(new EntityNotFoundException("존재하지 않는 게시물입니다."));
 
-            LikeRequest request = new LikeRequest(null);
+            LikeRequest request = new LikeRequest(TEST_POST_ID);
             String content = objectMapper.writeValueAsString(request);
 
             mockMvc.perform(put("/api/posts/like")
@@ -112,12 +114,10 @@ class PostLikeControllerTest {
                             .content(content))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value("FAIL"))
-                    .andExpect(jsonPath("$.message").value("게시물 ID는 필수입니다."))
-                    .andDo(document("posts-like-toggle-invalid-request",
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 게시물입니다."))
+                    .andDo(document("posts-like-non-existent-post",
                             requestFields(
-                                    fieldWithPath("postId").description("좋아요를 토글할 게시물 ID (null인 경우 오류)"),
-                                    fieldWithPath("liked").description("좋아요 상태 (요청 시 무시됨)").optional().ignored(),
-                                    fieldWithPath("likeCount").description("좋아요 수 (요청 시 무시됨)").optional().ignored()
+                                    fieldWithPath("postId").description("존재하지 않는 게시물 ID")
                             ),
                             responseFields(
                                     fieldWithPath("code").description("응답 코드"),

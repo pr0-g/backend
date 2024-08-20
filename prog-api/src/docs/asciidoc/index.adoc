@@ -130,10 +130,10 @@ include::{snippets}/posts-like-toggle/http-response.adoc[]
 == * 게시물 좋아요 토글 실패 (존재하지 않는 게시물 ID)
 
 === 요청
-include::{snippets}/posts-like-toggle-invalid-request/http-request.adoc[]
+include::{snippets}/posts-like-non-existent-post/http-request.adoc[]
 
 === 요청 필드
-include::{snippets}/posts-like-toggle-invalid-request/request-fields.adoc[]
+include::{snippets}/posts-like-non-existent-post/request-fields.adoc[]
 
 === 응답
-include::{snippets}/posts-like-toggle-invalid-request/http-response.adoc[]
+include::{snippets}/posts-like-non-existent-post/http-response.adoc[]

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import se.sowl.progapi.post.dto.PostSummary;
 import se.sowl.progdomain.post.domain.Post;
+import se.sowl.progdomain.post.repository.PostRepository;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
     private final LikeService likeService;
+    private final PostRepository postRepository;
 
     public Page<PostSummary> toPagePostSummary(Page<Post> pages) {
         List<PostSummary> list = pages.getContent().stream()
@@ -22,5 +24,9 @@ public class PostService {
                 return PostSummary.from(post, likeCount);
             }).toList();
         return new PageImpl<>(list, PageRequest.of(pages.getNumber(), pages.getSize()), pages.getTotalElements());
+    }
+
+    public boolean existsPost(Long postId) {
+        return postRepository.existsById(postId);
     }
 }

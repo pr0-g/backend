@@ -1,9 +1,12 @@
 package se.sowl.progapi.post.controller;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.post.dto.LikeRequest;
@@ -23,21 +26,22 @@ public class PostLikeController {
     @PreAuthorize("isAuthenticated()")
     public CommonResponse<LikeResponse> toggleLike(
             @AuthenticationPrincipal CustomOAuth2User user,
-            @RequestBody LikeRequest request
+            @Valid @RequestBody LikeRequest request
     ) {
-        if (request.getPostId() == null) {
-            return CommonResponse.fail("게시물 ID는 필수입니다.");
+        try {
+            boolean isLiked = likeService.toggleLike(request.getPostId(), user.getUserId());
+            long likeCount = likeService.getLikeCount(request.getPostId());
+            LikeResponse response = LikeResponse.createResponse(request.getPostId(), isLiked, likeCount);
+            return CommonResponse.ok(response);
+        } catch (EntityNotFoundException e) {
+            return CommonResponse.fail(e.getMessage());
         }
-
-        boolean isLiked = likeService.toggleLike(request.getPostId(), user.getUserId());
-        long likeCount = likeService.getLikeCount(request.getPostId());
-        LikeResponse response = LikeResponse.createResponse(request.getPostId(), isLiked, likeCount);
-        return CommonResponse.ok(response);
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonResponse<Void> handleExceptions(Exception ex) {
-        return CommonResponse.fail(ex.getMessage());
+    public CommonResponse<Void> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        return CommonResponse.fail(errorMessage);
     }
 }
