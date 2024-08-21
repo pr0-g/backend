@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -11,6 +12,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import redis.embedded.RedisServer;
+import se.sowl.progapi.post.exception.PostException;
 import se.sowl.progdomain.post.repository.LikeRepository;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ import java.net.ServerSocket;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class LikeServiceTest {
@@ -30,6 +33,9 @@ class LikeServiceTest {
 
     @Autowired
     private LikeService likeService;
+
+    @MockBean
+    private PostService postService;
 
     @BeforeAll
     static void setUpRedisServer() throws IOException {
@@ -54,6 +60,7 @@ class LikeServiceTest {
                 .getConnection()
                 .serverCommands()
                 .flushAll();
+        when(postService.existsPost(anyLong())).thenReturn(true);
     }
 
     @AfterEach
@@ -70,6 +77,7 @@ class LikeServiceTest {
             // given
             Long postId = 1L;
             Long userId = 1L;
+            when(postService.existsPost(postId)).thenReturn(true);
 
             // when
             boolean result = likeService.toggleLike(postId, userId);
@@ -86,6 +94,7 @@ class LikeServiceTest {
             // given
             Long postId = 2L;
             Long userId = 2L;
+            when(postService.existsPost(postId)).thenReturn(true);
             likeService.toggleLike(postId, userId);
 
             // when
@@ -95,6 +104,18 @@ class LikeServiceTest {
             assertFalse(result);
             assertEquals(0L, likeService.getLikeCount(postId));
             assertFalse(likeService.hasUserLiked(postId, userId));
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 게시글에 좋아요를 누르면 예외가 발생해야 한다.")
+        void toggleLikeNonExistentPost() {
+            // given
+            Long postId = 999L;
+            Long userId = 5L;
+            when(postService.existsPost(postId)).thenReturn(false);
+
+            // when & then
+            assertThrows(PostException.PostNotExistException.class, () -> likeService.toggleLike(postId, userId));
         }
     }
 
@@ -108,6 +129,7 @@ class LikeServiceTest {
             Long postId = 3L;
             Long userId1 = 3L;
             Long userId2 = 4L;
+            when(postService.existsPost(postId)).thenReturn(true);
             likeService.toggleLike(postId, userId1);
             likeService.toggleLike(postId, userId2);
 
@@ -123,6 +145,7 @@ class LikeServiceTest {
         void getLikeCountWithNotExistPostId() {
             // given
             Long postId = 999L;
+            when(postService.existsPost(postId)).thenReturn(false);
 
             // when
             long likeCount = likeService.getLikeCount(postId);
@@ -138,6 +161,7 @@ class LikeServiceTest {
         // given
         Long postId = 4L;
         Long userId = 5L;
+        when(postService.existsPost(postId)).thenReturn(true);
 
         // when
         likeService.toggleLike(postId, userId);
