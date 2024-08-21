@@ -17,7 +17,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import se.sowl.progapi.fixture.UserFixture;
 import se.sowl.progapi.oauth.service.OAuthService;
-import se.sowl.progapi.post.dto.PostSummary;
+import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progapi.post.service.LikedPostService;
 import se.sowl.progapi.post.service.RecentPostService;
 import se.sowl.progapi.post.service.TrendingPostService;
@@ -62,16 +62,16 @@ class PostControllerTest {
     @MockBean
     private UserRepository userRepository;
 
-    private List<PostSummary> createPostSummaries() {
+    private List<PostResponse> createPostSummaries() {
         return List.of(
-                PostSummary.builder()
+                PostResponse.builder()
                         .id(1L)
                         .title("Post 1")
                         .thumbnailUrl("thumbnail1.jpg")
                         .createdAt(LocalDateTime.now().minusHours(1))
                         .likeCount(30L)
                         .build(),
-                PostSummary.builder()
+                PostResponse.builder()
                         .id(2L)
                         .title("Post 2")
                         .thumbnailUrl("thumbnail2.jpg")
@@ -89,8 +89,8 @@ class PostControllerTest {
         @WithMockUser
         void getTrendingPostsWithPagination() throws Exception {
             // given
-            List<PostSummary> postSummaries = createPostSummaries();
-            Page<PostSummary> page = new PageImpl<>(postSummaries, PageRequest.of(0, 10), 2);
+            List<PostResponse> postSummaries = createPostSummaries();
+            Page<PostResponse> page = new PageImpl<>(postSummaries, PageRequest.of(0, 10), 2);
 
             when(trendingPostService.getTrendingPosts(any())).thenReturn(page);
 
@@ -146,8 +146,8 @@ class PostControllerTest {
         @WithMockUser
         void getRecentPostsWithPagination() throws Exception {
             // given
-            List<PostSummary> postSummaries = createPostSummaries();
-            Page<PostSummary> page = new PageImpl<>(postSummaries, PageRequest.of(0, 10), 2);
+            List<PostResponse> postSummaries = createPostSummaries();
+            Page<PostResponse> page = new PageImpl<>(postSummaries, PageRequest.of(0, 10), 2);
 
             when(recentPostService.getRecentPosts(any())).thenReturn(page);
 
@@ -207,8 +207,8 @@ class PostControllerTest {
             CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
             when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
 
-            List<PostSummary> postSummaries = createPostSummaries();
-            Page<PostSummary> page = new PageImpl<>(postSummaries, PageRequest.of(0, 10), 2);
+            List<PostResponse> postSummaries = createPostSummaries();
+            Page<PostResponse> page = new PageImpl<>(postSummaries, PageRequest.of(0, 10), 2);
             when(likedPostService.getLikedPosts(anyLong(), any(Pageable.class))).thenReturn(page);
 
             // when & then

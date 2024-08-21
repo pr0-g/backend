@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progapi.post.dto.PostSummary;
+import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -63,7 +63,7 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostResponse> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
         assertThat(result.getContent()).hasSize(10);
@@ -86,7 +86,7 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostResponse> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
         assertThat(result.getContent()).isEmpty();
@@ -103,7 +103,7 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostResponse> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
         assertThat(result.getContent()).hasSize(10);
@@ -119,7 +119,7 @@ class RecentPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // when
-        Page<PostSummary> result = recentPostService.getRecentPosts(pageRequest);
+        Page<PostResponse> result = recentPostService.getRecentPosts(pageRequest);
 
         // then
         assertThat(result.getContent()).hasSize(10);

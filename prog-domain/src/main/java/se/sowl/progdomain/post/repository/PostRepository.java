@@ -14,4 +14,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByCreatedAtBefore(LocalDateTime oneMonthAgo);
 
     Page<Post> findAllByIdInAndDeletedFalse(List<Long> id, Pageable pageable);
+
+    boolean existsByIdAndDeletedFalse(Long id);
 }

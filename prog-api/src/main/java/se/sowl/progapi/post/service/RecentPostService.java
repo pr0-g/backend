@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se.sowl.progapi.post.dto.PostSummary;
+import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -17,8 +17,8 @@ public class RecentPostService {
     private final PostService postService;
 
     @Transactional(readOnly = true)
-    public Page<PostSummary> getRecentPosts(Pageable pageable) {
+    public Page<PostResponse> getRecentPosts(Pageable pageable) {
         Page<Post> postsPage = postRepository.findAllByDeletedFalseOrderByCreatedAtDesc(pageable);
-        return postService.toPagePostSummary(postsPage);
+        return postService.toPagePostResponse(postsPage);
     }
 }

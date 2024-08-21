@@ -50,7 +50,14 @@ public class Post {
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
-    public void softDelete() {
+    public void update(String title, Long interestId, String thumbnailUrl) {
+        this.title = title;
+        this.interestId = interestId;
+        this.thumbnailUrl = thumbnailUrl;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void delete() {
         this.deleted = true;
         this.deletedAt = LocalDateTime.now();
     }
@@ -63,5 +70,10 @@ public class Post {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

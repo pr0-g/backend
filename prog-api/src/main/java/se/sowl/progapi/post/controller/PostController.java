@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
-import se.sowl.progapi.post.dto.PostSummary;
+import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progapi.post.service.LikedPostService;
 import se.sowl.progapi.post.service.RecentPostService;
 import se.sowl.progapi.post.service.TrendingPostService;
@@ -24,27 +24,27 @@ public class PostController {
 
     @GetMapping("/trending")
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<Page<PostSummary>> getTrendingPosts(@RequestParam("page") int page, @RequestParam("size") int size) {
+    public CommonResponse<Page<PostResponse>> getTrendingPosts(@RequestParam("page") int page, @RequestParam("size") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostSummary> trendingPosts = trendingPostService.getTrendingPosts(pageable);
+        Page<PostResponse> trendingPosts = trendingPostService.getTrendingPosts(pageable);
         return CommonResponse.ok(trendingPosts);
     }
 
     @GetMapping("/recent")
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<Page<PostSummary>> getRecentPost(@RequestParam("page") int page, @RequestParam("size") int size) {
+    public CommonResponse<Page<PostResponse>> getRecentPost(@RequestParam("page") int page, @RequestParam("size") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostSummary> trendingPosts = recentPostService.getRecentPosts(pageable);
+        Page<PostResponse> trendingPosts = recentPostService.getRecentPosts(pageable);
         return CommonResponse.ok(trendingPosts);
     }
 
     @GetMapping("/liked")
     @PreAuthorize("isAuthenticated()")
-    public CommonResponse<Page<PostSummary>> getLikedPost(
+    public CommonResponse<Page<PostResponse>> getLikedPost(
         @AuthenticationPrincipal CustomOAuth2User user, @RequestParam("page") int page, @RequestParam("size") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostSummary> trendingPosts = likedPostService.getLikedPosts(user.getUserId(), pageable);
+        Page<PostResponse> trendingPosts = likedPostService.getLikedPosts(user.getUserId(), pageable);
         return CommonResponse.ok(trendingPosts);
     }
 }

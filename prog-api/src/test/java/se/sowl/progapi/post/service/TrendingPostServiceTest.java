@@ -17,7 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import redis.embedded.RedisServer;
-import se.sowl.progapi.post.dto.PostSummary;
+import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -104,7 +104,7 @@ class TrendingPostServiceTest {
             Pageable pageable = PageRequest.of(0, 10);
 
             // when
-            Page<PostSummary> result = trendingPostService.getTrendingPosts(pageable);
+            Page<PostResponse> result = trendingPostService.getTrendingPosts(pageable);
 
             // then
             assertThat(result.getContent()).hasSize(10);
@@ -117,7 +117,7 @@ class TrendingPostServiceTest {
             Pageable pageable = PageRequest.of(0, 10);
 
             // when
-            Page<PostSummary> result = trendingPostService.getTrendingPosts(pageable);
+            Page<PostResponse> result = trendingPostService.getTrendingPosts(pageable);
 
             // then
             assertThat(result).isEmpty();

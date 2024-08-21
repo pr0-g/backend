@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import se.sowl.progapi.post.exception.PostException;
 import se.sowl.progdomain.post.domain.Like;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.LikeRepository;
@@ -41,8 +42,9 @@ public class LikeService {
 
     @Transactional
     public boolean toggleLike(Long postId, Long userId) {
+
         if (!postService.existsPost(postId)) {
-            throw new EntityNotFoundException("존재하지 않는 게시물입니다.");
+            throw new PostException.PostNotExistException();
         }
 
         return likeRepository.findByPostIdAndUserId(postId, userId)
