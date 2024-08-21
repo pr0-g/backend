@@ -85,9 +85,9 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostDetailResponse getPostDetail(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(PostException.PostNotExistException::new);
         PostContent postContent = postContentRepository.findByPostId(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글 내용이 존재하지 않습니다."));
+                .orElseThrow(PostException.PostContentNotExistException::new);
         long likeCount = likeService.getLikeCount(postId);
 
         return PostDetailResponse.from(post, postContent, likeCount);

@@ -84,6 +84,33 @@ include::{snippets}/interest-edit-fail/request-fields.adoc[]
 === 응답
 include::{snippets}/interest-edit-fail/http-response.adoc[]
 
+== 게시물 작성
+
+== * 작성에 성공한 경우
+
+=== 요청
+include::{snippets}/create-new-post/http-request.adoc[]
+
+=== 요청 필드
+include::{snippets}/create-new-post/request-fields.adoc[]
+
+=== 응답
+include::{snippets}/create-new-post/http-response.adoc[]
+
+== 게시물 수정
+
+== * 수정에 성공한 경우
+
+=== 요청
+include::{snippets}/update-existing-post/http-request.adoc[]
+
+=== 요청 필드
+include::{snippets}/update-existing-post/request-fields.adoc[]
+
+=== 응답
+include::{snippets}/update-existing-post/http-response.adoc[]
+
+
 == 트렌딩 목록 조회
 
 == * 조회에 성공한 경우
