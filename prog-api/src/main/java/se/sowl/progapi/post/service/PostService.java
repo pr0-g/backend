@@ -114,7 +114,9 @@ public class PostService {
                 .map(post -> {
                     long likeCount = likeService.getLikeCount(post.getId());
 
-                    String writerId = userRepository.findByIdOrThrow(post.getUserId()).getEmail().split("@")[0];
+                    String writerId = String.valueOf(userRepository.findById(post.getUserId())
+                            .map(User::getEmail)
+                            .map(email -> email.split("@")[0]));
 
                     return PostResponse.from(post, writerId, likeCount);
                 }).toList();
