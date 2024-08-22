@@ -113,7 +113,12 @@ public class PostService {
         List<PostResponse> list = pages.getContent().stream()
                 .map(post -> {
                     long likeCount = likeService.getLikeCount(post.getId());
-                    return PostResponse.from(post, likeCount);
+
+                    String writerId = String.valueOf(userRepository.findById(post.getUserId())
+                            .map(User::getEmail)
+                            .map(email -> email.split("@")[0]));
+
+                    return PostResponse.from(post, writerId, likeCount);
                 }).toList();
         return new PageImpl<>(list, PageRequest.of(pages.getNumber(), pages.getSize()), pages.getTotalElements());
     }
