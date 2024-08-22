@@ -99,11 +99,10 @@ public class PostService {
         Long userId = post.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotExistException::new);
-        String email = user.getEmail();
-        String userEmailId = email.split("@")[0];
+        String userNickname = user.getNickname();
         long likeCount = likeService.getLikeCount(post.getId());
 
-        return PostDetailResponse.from(post, postContent, userEmailId, likeCount);
+        return PostDetailResponse.from(post, postContent, userNickname, likeCount);
     }
 
     public boolean existsPost(Long postId) {
