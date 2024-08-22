@@ -27,7 +27,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -106,7 +105,8 @@ class PostContentControllerTest {
                                     fieldWithPath("message").description("응답 메시지"),
                                     fieldWithPath("result.id").description("생성된 게시글 ID"),
                                     fieldWithPath("result.title").description("게시글 제목"),
-                                    fieldWithPath("result.userId").description("작성자 ID"),
+                                    fieldWithPath("result.userId").description("작성자 SegID"),
+                                    fieldWithPath("result.userEmailId").description("작성자 이메일 ID"),
                                     fieldWithPath("result.interestId").description("관심사 ID"),
                                     fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                     fieldWithPath("result.createdAt").description("생성 시간"),
@@ -159,7 +159,8 @@ class PostContentControllerTest {
                                     fieldWithPath("message").description("응답 메시지"),
                                     fieldWithPath("result.id").description("수정된 게시글 ID"),
                                     fieldWithPath("result.title").description("수정된 게시글 제목"),
-                                    fieldWithPath("result.userId").description("작성자 ID"),
+                                    fieldWithPath("result.userId").description("작성자 SegID"),
+                                    fieldWithPath("result.userEmailId").description("작성자 이메일 ID"),
                                     fieldWithPath("result.interestId").description("관심사 ID"),
                                     fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                     fieldWithPath("result.createdAt").description("생성 시간"),
@@ -250,7 +251,8 @@ class PostContentControllerTest {
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("result.id").description("게시글 ID"),
                                 fieldWithPath("result.title").description("게시글 제목"),
-                                fieldWithPath("result.userId").description("작성자 ID"),
+                                fieldWithPath("result.userId").description("작성자 SegID"),
+                                fieldWithPath("result.userEmailId").description("작성자 이메일 ID"),
                                 fieldWithPath("result.interestId").description("관심사 ID"),
                                 fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                 fieldWithPath("result.createdAt").description("생성 시간"),

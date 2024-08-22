@@ -10,10 +10,13 @@ import se.sowl.progapi.post.dto.EditPostRequest;
 import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
+import se.sowl.progapi.user.exception.UserNotExistException;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
 import se.sowl.progdomain.post.repository.PostContentRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
+import se.sowl.progdomain.user.domain.User;
+import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -22,6 +25,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final PostContentRepository postContentRepository;
     private final LikeService likeService;
 
@@ -38,8 +42,7 @@ public class PostService {
             postContent = updateExistingPostContent(post.getId(), request.getContent());
         }
 
-        long likeCount = likeService.getLikeCount(post.getId());
-        return PostDetailResponse.from(post, postContent, likeCount);
+        return createPostDetailResponse(post, postContent);
     }
 
     private Post createNewPost(Long userId, EditPostRequest request) {
@@ -88,9 +91,19 @@ public class PostService {
                 .orElseThrow(PostException.PostNotExistException::new);
         PostContent postContent = postContentRepository.findByPostId(postId)
                 .orElseThrow(PostException.PostContentNotExistException::new);
-        long likeCount = likeService.getLikeCount(postId);
 
-        return PostDetailResponse.from(post, postContent, likeCount);
+        return createPostDetailResponse(post, postContent);
+    }
+
+    private PostDetailResponse createPostDetailResponse(Post post, PostContent postContent) {
+        Long userId = post.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotExistException::new);
+        String email = user.getEmail();
+        String userEmailId = email.split("@")[0];
+        long likeCount = likeService.getLikeCount(post.getId());
+
+        return PostDetailResponse.from(post, postContent, userEmailId, likeCount);
     }
 
     public boolean existsPost(Long postId) {

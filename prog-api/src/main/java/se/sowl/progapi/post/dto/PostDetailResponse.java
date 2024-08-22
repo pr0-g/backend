@@ -13,6 +13,7 @@ public class PostDetailResponse {
     private Long id;
     private String title;
     private Long userId;
+    private String userEmailId;
     private Long interestId;
     private String thumbnailUrl;
     private LocalDateTime createdAt;
@@ -20,11 +21,12 @@ public class PostDetailResponse {
     private String content;
     private long likeCount;
 
-    public static PostDetailResponse from(Post post, PostContent postContent, long likeCount) {
+    public static PostDetailResponse from(Post post, PostContent postContent, String userEmailId,long likeCount) {
         return PostDetailResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .userId(post.getUserId())
+                .userEmailId(userEmailId)
                 .interestId(post.getInterestId())
                 .thumbnailUrl(post.getThumbnailUrl())
                 .createdAt(post.getCreatedAt())
