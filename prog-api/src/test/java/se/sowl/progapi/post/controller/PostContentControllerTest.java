@@ -16,6 +16,7 @@ import se.sowl.progapi.fixture.UserFixture;
 import se.sowl.progapi.oauth.service.OAuthService;
 import se.sowl.progapi.post.dto.EditPostRequest;
 import se.sowl.progapi.post.dto.PostDetailResponse;
+import se.sowl.progapi.post.exception.PostException;
 import se.sowl.progapi.post.service.PostService;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
@@ -165,6 +166,47 @@ class PostContentControllerTest {
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
                                     fieldWithPath("result.likeCount").description("좋아요 수")
+                            )));
+        }
+
+        @Test
+        @DisplayName("수정 권한이 없는 경우 게시글 수정 실패")
+        @WithMockUser(roles = "USER")
+        void updatePostWithoutAuthorizationFails() throws Exception {
+            // Given
+            Long postId = 1L;
+            Long unauthorizedUserId = 2L;
+            EditPostRequest request = new EditPostRequest(postId, "Updated Title", "Updated Content", 2L, "updated_thumbnail.jpg");
+
+            // CustomOAuth2User 및 관련 mock 설정
+            User unauthorizedUser = UserFixture.createUser(unauthorizedUserId, "무권한", "무권한유저", "unauthorized@example.com", "naver");
+            CustomOAuth2User unauthorizedOAuth2User = UserFixture.createCustomOAuth2User(unauthorizedUser);
+
+            when(oAuthService.loadUser(any())).thenReturn(unauthorizedOAuth2User);
+            when(postService.editPost(eq(unauthorizedUserId), any(EditPostRequest.class)))
+                    .thenThrow(new PostException.PostNotAuthorizedException());
+
+            // When & Then
+            mockMvc.perform(put("/api/posts/edit")
+                            .with(oauth2Login().oauth2User(unauthorizedOAuth2User))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isForbidden()) // 403 Forbidden 응답 확인
+                    .andExpect(jsonPath("$.code").value("FAIL"))
+                    .andExpect(jsonPath("$.message").value("게시글 수정 권한이 없습니다."))
+                    .andDo(document("update-post-without-authorization",
+                            requestFields(
+                                    fieldWithPath("id").description("수정할 게시글 ID"),
+                                    fieldWithPath("title").description("수정할 게시글 제목"),
+                                    fieldWithPath("content").description("수정할 게시글 내용"),
+                                    fieldWithPath("interestId").description("수정할 관심사 ID"),
+                                    fieldWithPath("thumbnailUrl").description("수정할 썸네일 URL").optional()
+                            ),
+                            responseFields(
+                                    fieldWithPath("code").description("응답 코드"),
+                                    fieldWithPath("message").description("응답 메시지"),
+                                    fieldWithPath("result").description("결과 (에러 시 null)").optional()
                             )));
         }
     }
