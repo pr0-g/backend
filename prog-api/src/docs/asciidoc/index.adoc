@@ -164,3 +164,14 @@ include::{snippets}/posts-like-non-existent-post/request-fields.adoc[]
 
 === 응답
 include::{snippets}/posts-like-non-existent-post/http-response.adoc[]
+
+== 게시글 상세 조회
+
+== * 조회에 성공한 경우
+
+=== 요청
+include::{snippets}/get-post-detail/http-request.adoc[]
+
+=== 응답
+include::{snippets}/get-post-detail/http-response.adoc[]
+

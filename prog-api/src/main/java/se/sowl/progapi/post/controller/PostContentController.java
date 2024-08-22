@@ -6,11 +6,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.post.dto.EditPostRequest;
+import se.sowl.progapi.post.dto.PostDetailRequest;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.service.PostService;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 
 import jakarta.validation.Valid;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -30,8 +33,8 @@ public class PostContentController {
     }
 
     @GetMapping("/detail")
-    public CommonResponse<PostDetailResponse> getPostDetail(@Valid @RequestBody Long postId) {
-        PostDetailResponse response = postService.getPostDetail(postId);
+    public CommonResponse<PostDetailResponse> getPostDetail(@Valid @RequestBody PostDetailRequest request) {
+        PostDetailResponse response = postService.getPostDetail(request.getPostId());
         return CommonResponse.ok(response);
     }
 }

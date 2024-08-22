@@ -23,15 +23,16 @@ import se.sowl.progdomain.user.domain.User;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PostContentController.class)
 @AutoConfigureRestDocs
@@ -169,55 +170,51 @@ class PostContentControllerTest {
     }
 
 
-    /*@Nested
-    @DisplayName("GET /api/posts/detail")
-    class getPostDetail{
-        @Test
-        @DisplayName("게시글 상세 조회 성공")
-        @WithMockUser
-        void getPostDetailSuccess() throws Exception {
-            // Given
-            Long postId = 1L;
-            PostDetailResponse response = PostDetailResponse.builder()
-                    .id(postId)
-                    .title("Test Title")
-                    .userId(1L)
-                    .interestId(1L)
-                    .thumbnailUrl("test.jpg")
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .content("Test Content")
-                    .likeCount(10L)
-                    .build();
+    @Test
+    @DisplayName("게시글 상세 조회 성공")
+    @WithMockUser
+    void getPostDetailSuccess() throws Exception {
+        // Given
+        Long postId = 1L;
+        PostDetailResponse response = PostDetailResponse.builder()
+                .id(postId)
+                .title("Test Title")
+                .userId(1L)
+                .interestId(1L)
+                .thumbnailUrl("test.jpg")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .content("Test Content")
+                .likeCount(10L)
+                .build();
 
-            when(postService.getPostDetail(anyLong())).thenReturn(response);
+        when(postService.getPostDetail(anyLong())).thenReturn(response);
 
-            // When & Then
-            mockMvc.perform(get("/api/posts/detail")
-                            .content(String.valueOf(postId))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .with(csrf()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.id").value(postId))
-                    .andExpect(jsonPath("$.result.title").value("Test Title"))
-                    .andDo(document("get-post-detail",
-                            requestFields(
-                                    fieldWithPath("postId").description("게시글 ID")
-                            ),
-                            responseFields(
-                                    fieldWithPath("code").description("응답 코드"),
-                                    fieldWithPath("message").description("응답 메시지"),
-                                    fieldWithPath("result.id").description("게시글 ID"),
-                                    fieldWithPath("result.title").description("게시글 제목"),
-                                    fieldWithPath("result.userId").description("작성자 ID"),
-                                    fieldWithPath("result.interestId").description("관심사 ID"),
-                                    fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
-                                    fieldWithPath("result.createdAt").description("생성 시간"),
-                                    fieldWithPath("result.updatedAt").description("수정 시간"),
-                                    fieldWithPath("result.content").description("게시글 내용"),
-                                    fieldWithPath("result.likeCount").description("좋아요 수")
-                            )));
-        }
-    }*/
+        // When & Then
+        mockMvc.perform(get("/api/posts/detail")
+                        .content("{\"postId\": " + postId + "}")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.id").value(postId))
+                .andExpect(jsonPath("$.result.title").value("Test Title"))
+                .andDo(document("get-post-detail",
+                        requestFields(
+                                fieldWithPath("postId").description("게시글 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("result.id").description("게시글 ID"),
+                                fieldWithPath("result.title").description("게시글 제목"),
+                                fieldWithPath("result.userId").description("작성자 ID"),
+                                fieldWithPath("result.interestId").description("관심사 ID"),
+                                fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
+                                fieldWithPath("result.createdAt").description("생성 시간"),
+                                fieldWithPath("result.updatedAt").description("수정 시간"),
+                                fieldWithPath("result.content").description("게시글 내용"),
+                                fieldWithPath("result.likeCount").description("좋아요 수")
+                        )));
+    }
 }
