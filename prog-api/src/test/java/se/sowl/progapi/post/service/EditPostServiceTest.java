@@ -14,6 +14,7 @@ import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
 import se.sowl.progdomain.post.repository.PostContentRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
+import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -32,6 +33,9 @@ public class EditPostServiceTest {
 
     @Mock
     private LikeService likeService;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private PostService postService;

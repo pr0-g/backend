@@ -1,6 +1,5 @@
 package se.sowl.progapi.post.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +19,7 @@ import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -98,9 +98,9 @@ public class PostService {
 
     private PostDetailResponse createPostDetailResponse(Post post, PostContent postContent) {
         Long userId = post.getUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotExistException::new);
-        String userNickname = user.getNickname();
+        String userNickname = userRepository.findById(userId)
+                .map(User::getNickname)
+                .orElse("Unknown User");
         long likeCount = likeService.getLikeCount(post.getId());
 
         return PostDetailResponse.from(post, postContent, userNickname, likeCount);
@@ -115,9 +115,9 @@ public class PostService {
                 .map(post -> {
                     long likeCount = likeService.getLikeCount(post.getId());
 
-                    User user = userRepository.findById(post.getUserId())
-                            .orElseThrow(() -> new EntityNotFoundException("유저 정보를 찾을 수 없습니다: " + post.getUserId()));
-                    String writerId = user.getEmail().split("@")[0];
+                    String writerId = String.valueOf(userRepository.findById(post.getUserId())
+                            .map(User::getEmail)
+                            .map(email -> email.split("@")[0]));
 
                     return PostResponse.from(post, writerId, likeCount);
                 }).toList();
