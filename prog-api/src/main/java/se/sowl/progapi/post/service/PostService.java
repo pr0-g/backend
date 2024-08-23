@@ -1,5 +1,6 @@
 package se.sowl.progapi.post.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -114,9 +115,9 @@ public class PostService {
                 .map(post -> {
                     long likeCount = likeService.getLikeCount(post.getId());
 
-                    String writerId = String.valueOf(userRepository.findById(post.getUserId())
-                            .map(User::getEmail)
-                            .map(email -> email.split("@")[0]));
+                    User user = userRepository.findById(post.getUserId())
+                            .orElseThrow(() -> new EntityNotFoundException("유저 정보를 찾을 수 없습니다: " + post.getUserId()));
+                    String writerId = user.getEmail().split("@")[0];
 
                     return PostResponse.from(post, writerId, likeCount);
                 }).toList();
