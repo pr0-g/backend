@@ -22,11 +22,14 @@ import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,6 +55,7 @@ class PostContentControllerTest {
 
     private User testUser;
     private CustomOAuth2User customOAuth2User;
+
 
     @BeforeEach
     void setUp() {
@@ -235,17 +239,16 @@ class PostContentControllerTest {
 
         // When & Then
         mockMvc.perform(get("/api/posts/detail")
-                        .content("{\"postId\": " + postId + "}")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("postId", String.valueOf(postId))
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.id").value(postId))
                 .andExpect(jsonPath("$.result.title").value("Test Title"))
                 .andDo(document("get-post-detail",
-                        requestFields(
-                                fieldWithPath("postId").description("게시글 ID")
-                        ),
+                        queryParameters(
+                                parameterWithName("postId").description("게시글 ID")
+                        ).and(parameterWithName("_csrf").ignored()),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("message").description("응답 메시지"),
