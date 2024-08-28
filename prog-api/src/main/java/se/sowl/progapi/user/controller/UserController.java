@@ -45,4 +45,12 @@ public class UserController {
         return CommonResponse.ok(userInterests);
     }
 
+    // 유저 탈퇴 API
+    @DeleteMapping("/withdraw")
+    @PreAuthorize("isAuthenticated()")
+    public CommonResponse<Void> withdrawUser(@AuthenticationPrincipal CustomOAuth2User user) {
+        userService.withdrawUser(user.getUserId());
+        return CommonResponse.ok();
+    }
+
 }

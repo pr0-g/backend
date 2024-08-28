@@ -49,4 +49,10 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void withdrawUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        userRepository.delete(user);
+    }
+
 }
