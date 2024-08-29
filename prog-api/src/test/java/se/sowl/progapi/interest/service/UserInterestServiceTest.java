@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import se.sowl.progapi.fixture.UserFixture;
-import se.sowl.progapi.user.exception.UserNotExistException;
+import se.sowl.progapi.user.exception.UserException;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.domain.UserInterest;
 import se.sowl.progdomain.interest.repository.InterestRepository;
@@ -46,7 +46,7 @@ class UserInterestServiceTest {
     void userNotExist() {
         // given
         // when & then
-        assertThrows(UserNotExistException.class, () -> {
+        assertThrows(UserException.UserNotExistException.class, () -> {
             userInterestService.updateUserInterests(1L, List.of(1L, 2L));
         });
     }
@@ -69,7 +69,8 @@ class UserInterestServiceTest {
             );
         });
         assertThat(exception.getMessage()).contains("존재하지 않는 관심사 ID가 포함되어 있습니다.");
-        List<UserInterest> result = userInterestRepository.findAllByUserId(user.getId()).orElse(List.of());
+        List<UserInterest> result = userInterestRepository.findAllByUserId(user.getId());
+
         assertThat(result).isEmpty();
     }
 
@@ -92,7 +93,7 @@ class UserInterestServiceTest {
                 user.getId(),
                 List.of(interests.get(0).getId(), interests.get(2).getId())
         );
-        List<UserInterest> result = userInterestRepository.findAllByUserId(user.getId()).get();
+        List<UserInterest> result = userInterestRepository.findAllByUserId(user.getId());
 
         // then
         assertThat(result).hasSize(2);
@@ -114,7 +115,7 @@ class UserInterestServiceTest {
             user.getId(),
             List.of(interests.get(0).getId(), interests.get(1).getId(), interests.get(2).getId())
         );
-        List<UserInterest> result = userInterestRepository.findAllByUserId(user.getId()).get();
+        List<UserInterest> result = userInterestRepository.findAllByUserId(user.getId());
 
         // then
         assertThat(result).hasSize(3);

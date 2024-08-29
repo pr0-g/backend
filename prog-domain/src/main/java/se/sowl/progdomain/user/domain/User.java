@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import se.sowl.progdomain.user.InvalidNicknameException;
 import se.sowl.progdomain.interest.domain.UserInterest;
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
+
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -36,6 +39,12 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private Set<UserInterest> userInterest;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    @Column
+    private LocalDateTime deletedAt;
+
     @Builder
     public User(Long id, String name, String nickname, String email, String provider) {
         this.id = id;
@@ -53,5 +62,20 @@ public class User {
             throw new InvalidNicknameException("닉네임은 2자 이상 15자 이하여야 합니다.");
         }
         this.nickname = nickname;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public void anonymizePersonalData() {
+        this.name = "Deleted User";
+        this.nickname = "deleted_" + UUID.randomUUID().toString().substring(0, 8);
+        this.email = "deleted_" + UUID.randomUUID().toString() + "@example.com";
+        this.provider = "anonymous";
     }
 }

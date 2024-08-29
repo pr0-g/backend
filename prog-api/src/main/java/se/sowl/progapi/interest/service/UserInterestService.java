@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.sowl.progapi.interest.dto.UserInterestRequest;
-import se.sowl.progapi.user.exception.UserNotExistException;
+import se.sowl.progapi.user.exception.UserException;
 import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.domain.UserInterest;
 import se.sowl.progdomain.interest.repository.InterestRepository;
@@ -25,7 +25,10 @@ public class UserInterestService {
 
     @Transactional
     public List<UserInterestRequest> getUserInterests(Long userId) {
-        List<UserInterest> userInterests = userInterestRepository.findAllByUserId(userId).orElseThrow(UserNotExistException::new);
+        List<UserInterest> userInterests = userInterestRepository.findAllByUserId(userId);
+        if (userInterests.isEmpty()) {
+            throw new UserException.UserNotExistException();
+        }
         return userInterests.stream()
                 .map(ui -> new UserInterestRequest(ui.getInterest().getId(), ui.getInterest().getName()))
                 .collect(Collectors.toList());
@@ -34,7 +37,7 @@ public class UserInterestService {
     @Transactional
     public void updateUserInterests(Long userId, List<Long> interestIdList){
         userInterestRepository.deleteAllByUserId(userId);
-        User user = userRepository.findById(userId).orElseThrow(UserNotExistException::new);
+        User user = userRepository.findById(userId).orElseThrow(UserException.UserNotExistException::new);
         List<UserInterest> userInterests = getUserInterests(interestIdList, user);
         userInterestRepository.saveAll(userInterests);
     }

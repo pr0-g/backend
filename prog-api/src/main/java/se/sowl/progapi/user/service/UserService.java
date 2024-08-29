@@ -5,10 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import se.sowl.progapi.interest.dto.UserInterestRequest;
-import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.interest.service.UserInterestService;
+import se.sowl.progapi.post.exception.PostException;
 import se.sowl.progapi.user.dto.EditUserRequest;
 import se.sowl.progapi.user.dto.UserInfoRequest;
+import se.sowl.progapi.user.exception.UserException;
+import se.sowl.progdomain.interest.repository.UserInterestRepository;
+import se.sowl.progdomain.post.domain.PostContent;
+import se.sowl.progdomain.post.repository.LikeRepository;
+import se.sowl.progdomain.post.repository.PostRepository;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
@@ -19,6 +24,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserInterestRepository userInterestRepository;
+    private final LikeRepository likeRepository;
+    private final PostRepository postRepository;
 
     private final UserInterestService userInterestService;
 
@@ -51,8 +59,15 @@ public class UserService {
 
     @Transactional
     public void withdrawUser(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
-        userRepository.delete(user);
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserException.UserNotExistException::new);
+
+        user.anonymizePersonalData();
+        postRepository.deleteAllByUserId(userId);
+        userInterestRepository.deleteAllByUserId(userId);
+        likeRepository.deleteAllByUserId(userId);
+
+        userRepository.save(user);
     }
 
 }

@@ -7,6 +7,7 @@ import se.sowl.progdomain.post.domain.Post;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
@@ -16,4 +17,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByIdInAndDeletedFalse(List<Long> id, Pageable pageable);
 
     boolean existsByIdAndDeletedFalse(Long id);
+
+    void deleteAllByUserId(Long userId);
+
+    List<Post> findAllByUserId(Long userId);
+
 }

@@ -10,7 +10,6 @@ import se.sowl.progapi.post.dto.EditPostRequest;
 import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
-import se.sowl.progapi.user.exception.UserNotExistException;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
 import se.sowl.progdomain.post.repository.PostContentRepository;
@@ -19,7 +18,6 @@ import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

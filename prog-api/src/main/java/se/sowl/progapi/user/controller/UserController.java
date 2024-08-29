@@ -1,9 +1,12 @@
 package se.sowl.progapi.user.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import se.sowl.progapi.common.CommonResponse;
 import se.sowl.progapi.interest.dto.UserInterestRequest;
@@ -45,11 +48,13 @@ public class UserController {
         return CommonResponse.ok(userInterests);
     }
 
-    // 유저 탈퇴 API
     @DeleteMapping("/withdraw")
     @PreAuthorize("isAuthenticated()")
     public CommonResponse<Void> withdrawUser(@AuthenticationPrincipal CustomOAuth2User user) {
         userService.withdrawUser(user.getUserId());
+
+        // 로그아웃
+        SecurityContextHolder.clearContext();
         return CommonResponse.ok();
     }
 
