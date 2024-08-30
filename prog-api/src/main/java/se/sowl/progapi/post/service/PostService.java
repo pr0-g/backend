@@ -121,4 +121,10 @@ public class PostService {
                 }).toList();
         return new PageImpl<>(list, PageRequest.of(pages.getNumber(), pages.getSize()), pages.getTotalElements());
     }
+
+    public void softDeletePostByWithDrawUserId(Long userId) {
+        List<Post> posts = postRepository.findAllByUserId(userId);
+        posts.forEach(Post::softDelete);
+        postRepository.saveAll(posts);
+    }
 }

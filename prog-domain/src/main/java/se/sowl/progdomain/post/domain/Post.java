@@ -57,11 +57,6 @@ public class Post {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void delete() {
-        this.deleted = true;
-        this.deletedAt = LocalDateTime.now();
-    }
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

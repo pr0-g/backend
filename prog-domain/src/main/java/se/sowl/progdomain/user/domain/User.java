@@ -39,11 +39,17 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private Set<UserInterest> userInterest;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
-    @Column
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+
+
 
     @Builder
     public User(Long id, String name, String nickname, String email, String provider) {
@@ -53,6 +59,7 @@ public class User {
         this.email = email;
         this.provider = provider;
         this.userInterest = Set.of();
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
     public void updateNickname(String nickname) {
@@ -64,18 +71,9 @@ public class User {
         this.nickname = nickname;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
 
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-
-    public void anonymizePersonalData() {
-        this.name = "Deleted User";
-        this.nickname = "deleted_" + UUID.randomUUID().toString().substring(0, 8);
-        this.email = "deleted_" + UUID.randomUUID().toString() + "@example.com";
-        this.provider = "anonymous";
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

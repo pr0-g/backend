@@ -2,7 +2,6 @@ package se.sowl.progapi.user.service;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,12 +11,15 @@ import se.sowl.progapi.user.dto.EditUserRequest;
 import se.sowl.progapi.user.exception.UserException;
 import se.sowl.progdomain.interest.repository.UserInterestRepository;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
+import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.LikeRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
 import se.sowl.progdomain.user.InvalidNicknameException;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +47,6 @@ class UserServiceTest {
 
     @MockBean
     private OAuthService oAuthService;
-
 
 
     private User testUser;
@@ -110,21 +111,17 @@ class UserServiceTest {
     @DisplayName("사용자 탈퇴")
     class WithdrawUser {
         @Test
-        @DisplayName("사용자 탈퇴 시 개인정보가 익명화되고 관련 데이터가 삭제된다.")
+        @DisplayName("사용자 탈퇴 시 유저에 관한 데이터는 softDelete 한다.")
         void withdrawUser() {
             // when
             userService.withdrawUser(testUser.getId());
 
             // then
             User withdrawnUser = userRepository.findById(testUser.getId()).orElseThrow();
-            assertThat(withdrawnUser.getName()).isNotEqualTo("John Doe");
-            assertThat(withdrawnUser.getNickname()).startsWith("deleted_");
-            assertThat(withdrawnUser.getEmail()).endsWith("@example.com");
-            assertThat(withdrawnUser.getProvider()).isEqualTo("anonymous");
+            List<Post> withdrawnUserPosts = postRepository.findAllByUserId(withdrawnUser.getId());
 
-            assertThat(postRepository.findAllByUserId(testUser.getId())).isEmpty();
-            assertThat(userInterestRepository.findAllByUserId(testUser.getId())).isEmpty();
-            assertThat(likeRepository.findAllByUserId(testUser.getId())).isEmpty();
+            assertThat(withdrawnUser.isDeleted()).isTrue();
+            assertThat(withdrawnUserPosts).allMatch(Post::isDeleted);
         }
 
         @Test
@@ -139,5 +136,4 @@ class UserServiceTest {
             });
         }
     }
-
 }
