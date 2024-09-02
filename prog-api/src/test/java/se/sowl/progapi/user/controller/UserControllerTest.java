@@ -1,4 +1,5 @@
 package se.sowl.progapi.user.controller;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import se.sowl.progapi.fixture.UserFixture;
@@ -17,6 +17,7 @@ import se.sowl.progapi.interest.dto.UserInterestRequest;
 import se.sowl.progapi.interest.service.UserInterestService;
 import se.sowl.progapi.oauth.service.OAuthService;
 import se.sowl.progapi.user.dto.UserInfoRequest;
+import se.sowl.progapi.user.exception.UserException;
 import se.sowl.progapi.user.service.UserService;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.InvalidNicknameException;
@@ -34,7 +35,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -54,6 +55,17 @@ public class UserControllerTest {
     @MockBean
     private UserInterestService userInterestService;
 
+    private User testUser;
+    private CustomOAuth2User customOAuth2User;
+
+    @BeforeEach
+    void setUp() {
+        testUser = UserFixture.createUser(1L, "테스트", "테스트유저", "test@example.com", "naver");
+        customOAuth2User = UserFixture.createCustomOAuth2User(testUser);
+        when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
+    }
+
+
     @Nested
     @DisplayName("GET /api/users/me")
     class GetMe {
@@ -62,21 +74,17 @@ public class UserControllerTest {
         @WithMockUser(roles = "USER")
         public void getMeSuccess() throws Exception {
             // given
-            Long userId = 1L;
-            User fixtureUser = UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google");
-            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
-
             List<UserInterestRequest> interests = Arrays.asList(
                     new UserInterestRequest(1L, "Technology"),
                     new UserInterestRequest(2L, "Travel")
             );
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(
-                    userId, "test@example.com", "Test User", "testuser", "google", interests
+                    testUser.getId(), "test@example.com", "Test User", "testuser", "google", interests
             );
 
             when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
-            when(userService.getUserInfo(eq(userId))).thenReturn(userInfoRequest);
+            when(userService.getUserInfo(eq(testUser.getId()))).thenReturn(userInfoRequest);
 
             // when & then
             mockMvc.perform(get("/api/users/me")
@@ -85,7 +93,7 @@ public class UserControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value("SUCCESS"))
                     .andExpect(jsonPath("$.message").value("성공"))
-                    .andExpect(jsonPath("$.result.userId").value(userId))
+                    .andExpect(jsonPath("$.result.userId").value(testUser.getId()))
                     .andExpect(jsonPath("$.result.email").value("test@example.com"))
                     .andExpect(jsonPath("$.result.name").value("Test User"))
                     .andExpect(jsonPath("$.result.nickname").value("testuser"))
@@ -120,10 +128,6 @@ public class UserControllerTest {
         @DisplayName("유저 정보 수정 성공")
         @WithMockUser(roles = "USER")
         public void editSuccess() throws Exception {
-            User fixtureUser = UserFixture.createUser(1L, "안녕", "안녕1", "dasd@naver.com", "naver");
-            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
-            when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
-            doNothing().when(userService).editUser(eq(fixtureUser.getId()), any());
 
             mockMvc.perform(put("/api/users/edit")
                     .with(oauth2Login().oauth2User(customOAuth2User))
@@ -146,11 +150,11 @@ public class UserControllerTest {
         @DisplayName("유저 정보 수정 실패 (닉네임 길이 2미만 15이상)")
         @WithMockUser(roles = "USER")
         public void editFailByShortLength() throws Exception {
-            User fixtureUser = UserFixture.createUser(1L, "안녕", "안녕1", "dasd@naver.com", "naver");
-            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
-            when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
-            doThrow(new InvalidNicknameException("닉네임은 2자 이상 15자 이하여야 합니다.")).when(userService).editUser(eq(fixtureUser.getId()), any());
 
+            // given
+            doThrow(new InvalidNicknameException("닉네임은 2자 이상 15자 이하여야 합니다.")).when(userService).editUser(eq(testUser.getId()), any());
+
+            // when & then
             mockMvc.perform(put("/api/users/edit")
                     .with(oauth2Login().oauth2User(customOAuth2User))
                     .with(csrf())
@@ -174,17 +178,12 @@ public class UserControllerTest {
     @WithMockUser(roles = "USER")
     public void getUserInterestsSuccess() throws Exception {
         // given
-        Long userId = 1L;
-        User fixtureUser = UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google");
-        CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
-
         List<UserInterestRequest> interests = Arrays.asList(
                 new UserInterestRequest(1L, "Technology"),
                 new UserInterestRequest(2L, "Travel")
         );
 
-        when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
-        when(userInterestService.getUserInterests(eq(userId))).thenReturn(interests);
+        when(userInterestService.getUserInterests(eq(testUser.getId()))).thenReturn(interests);
 
         // when & then
         mockMvc.perform(get("/api/users/interests")
@@ -218,9 +217,6 @@ public class UserControllerTest {
         @WithMockUser(roles = "USER")
         public void getUserInterestsSuccess() throws Exception {
             // given
-            Long userId = 1L;
-            User fixtureUser = UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google");
-            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(fixtureUser);
 
             List<UserInterestRequest> interests = Arrays.asList(
                     new UserInterestRequest(1L, "Technology"),
@@ -228,7 +224,7 @@ public class UserControllerTest {
             );
 
             when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
-            when(userInterestService.getUserInterests(eq(userId))).thenReturn(interests);
+            when(userInterestService.getUserInterests(eq(testUser.getId()))).thenReturn(interests);
 
             // when & then
             mockMvc.perform(get("/api/users/interests")
@@ -252,6 +248,72 @@ public class UserControllerTest {
                                     fieldWithPath("result[].name").description("관심사 이름")
                             )
                     ));
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/users/withdraw")
+    class WithdrawUser {
+        @Test
+        @DisplayName("인증된 사용자가 탈퇴할 수 있다")
+        @WithMockUser(roles = "USER")
+        void withdrawUserSuccess() throws Exception {
+            // given
+            Long userId = 1L;
+            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(
+                    UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google")
+            );
+            doNothing().when(userService).withdrawUser(userId);
+
+            // when & then
+            mockMvc.perform(delete("/api/users/withdraw")
+                            .with(csrf())
+                            .with(oauth2Login().oauth2User(customOAuth2User))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value("SUCCESS"))
+                    .andExpect(jsonPath("$.message").value("성공"))
+                    .andExpect(jsonPath("$.result").doesNotExist())
+                    .andDo(document("user-withdraw",
+                            responseFields(
+                                    fieldWithPath("code").description("응답 코드"),
+                                    fieldWithPath("message").description("응답 메시지"),
+                                    fieldWithPath("result").description("결과 데이터 (탈퇴 시 null)")
+                            )
+                    ));
+
+            verify(userService, times(1)).withdrawUser(userId);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 사용자가 탈퇴를 시도하면 실패한다")
+        @WithMockUser(roles = "USER")
+        void withdrawUserNotFound() throws Exception {
+            // given
+            Long userId = 999L;
+            CustomOAuth2User customOAuth2User = UserFixture.createCustomOAuth2User(
+                    UserFixture.createUser(userId, "Test User", "testuser", "test@example.com", "google")
+            );
+            doThrow(new UserException.UserNotExistException()).when(userService).withdrawUser(userId);
+
+            // when & then
+            mockMvc.perform(delete("/api/users/withdraw")
+                            .with(csrf())
+                            .with(oauth2Login().oauth2User(customOAuth2User))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value("FAIL"))
+                    .andExpect(jsonPath("$.message").value("사용자를 찾을 수 없습니다."))
+                    .andExpect(jsonPath("$.result").doesNotExist())
+                    .andDo(document("user-withdraw-not-found",
+                            responseFields(
+                                    fieldWithPath("code").description("응답 코드"),
+                                    fieldWithPath("message").description("응답 메시지"),
+                                    fieldWithPath("result").description("결과 데이터 (실패 시 null)")
+                            )
+                    ));
+
+            verify(userService, times(1)).withdrawUser(userId);
         }
     }
 }
