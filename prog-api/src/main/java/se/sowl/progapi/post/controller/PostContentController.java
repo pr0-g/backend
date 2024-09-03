@@ -39,8 +39,11 @@ public class PostContentController {
     }
 
     @GetMapping("/detail")
-    public CommonResponse<PostDetailResponse> getPostDetail(@RequestParam Long postId) {
-        PostDetailResponse response = postService.getPostDetail(postId);
+    public CommonResponse<PostDetailResponse> getPostDetail(
+            @AuthenticationPrincipal CustomOAuth2User user,
+            @RequestParam Long postId
+    ) {
+        PostDetailResponse response = postService.getPostDetail(user.getUserId(), postId);
         return CommonResponse.ok(response);
     }
 

@@ -76,7 +76,7 @@ class PostContentControllerTest {
             PostDetailResponse response = PostDetailResponse.builder()
                     .id(1L)
                     .title("New Title")
-                    .userId(testUser.getId())
+                    .writerId(testUser.getId())
                     .interestId(2L)
                     .thumbnailUrl("new_thumbnail.jpg")
                     .createdAt(LocalDateTime.now())
@@ -109,14 +109,15 @@ class PostContentControllerTest {
                                     fieldWithPath("message").description("응답 메시지"),
                                     fieldWithPath("result.id").description("생성된 게시글 ID"),
                                     fieldWithPath("result.title").description("게시글 제목"),
-                                    fieldWithPath("result.userId").description("작성자 ID"),
-                                    fieldWithPath("result.userNickname").description("작성자 닉네임"),
+                                    fieldWithPath("result.writerId").description("작성자 ID"),
+                                    fieldWithPath("result.writerNickname").description("작성자 닉네임"),
                                     fieldWithPath("result.interestId").description("관심사 ID"),
                                     fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                     fieldWithPath("result.createdAt").description("생성 시간"),
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
-                                    fieldWithPath("result.likeCount").description("좋아요 수")
+                                    fieldWithPath("result.likeCount").description("좋아요 수"),
+                                    fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                             )));
         }
 
@@ -130,7 +131,7 @@ class PostContentControllerTest {
             PostDetailResponse response = PostDetailResponse.builder()
                     .id(postId)
                     .title("Updated Title")
-                    .userId(testUser.getId())
+                    .writerId(testUser.getId())
                     .interestId(2L)
                     .thumbnailUrl("updated_thumbnail.jpg")
                     .createdAt(LocalDateTime.now())
@@ -163,14 +164,15 @@ class PostContentControllerTest {
                                     fieldWithPath("message").description("응답 메시지"),
                                     fieldWithPath("result.id").description("수정된 게시글 ID"),
                                     fieldWithPath("result.title").description("수정된 게시글 제목"),
-                                    fieldWithPath("result.userId").description("작성자 ID"),
-                                    fieldWithPath("result.userNickname").description("작성자 닉네임"),
+                                    fieldWithPath("result.writerId").description("작성자 ID"),
+                                    fieldWithPath("result.writerNickname").description("작성자 닉네임"),
                                     fieldWithPath("result.interestId").description("관심사 ID"),
                                     fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                     fieldWithPath("result.createdAt").description("생성 시간"),
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
-                                    fieldWithPath("result.likeCount").description("좋아요 수")
+                                    fieldWithPath("result.likeCount").description("좋아요 수"),
+                                    fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                             )));
         }
 
@@ -219,32 +221,38 @@ class PostContentControllerTest {
 
     @Test
     @DisplayName("게시글 상세 조회 성공")
-    @WithMockUser
     void getPostDetailSuccess() throws Exception {
         // Given
         Long postId = 1L;
+        Long userId = testUser.getId();
         PostDetailResponse response = PostDetailResponse.builder()
                 .id(postId)
                 .title("Test Title")
-                .userId(1L)
+                .writerId(userId)
+                .writerNickname("테스트유저")
                 .interestId(1L)
                 .thumbnailUrl("test.jpg")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .content("Test Content")
                 .likeCount(10L)
+                .userLiked(false)
                 .build();
 
-        when(postService.getPostDetail(anyLong())).thenReturn(response);
+        when(postService.getPostDetail(eq(userId), eq(postId))).thenReturn(response);
 
         // When & Then
         mockMvc.perform(get("/api/posts/detail")
                         .param("postId", String.valueOf(postId))
+                        .with(oauth2Login().oauth2User(customOAuth2User))
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.id").value(postId))
                 .andExpect(jsonPath("$.result.title").value("Test Title"))
+                .andExpect(jsonPath("$.result.writerId").value(userId))
+                .andExpect(jsonPath("$.result.writerNickname").value("테스트유저"))
+                .andExpect(jsonPath("$.result.userLiked").value(false))
                 .andDo(document("get-post-detail",
                         queryParameters(
                                 parameterWithName("postId").description("게시글 ID")
@@ -254,14 +262,15 @@ class PostContentControllerTest {
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("result.id").description("게시글 ID"),
                                 fieldWithPath("result.title").description("게시글 제목"),
-                                fieldWithPath("result.userId").description("작성자 ID"),
-                                fieldWithPath("result.userNickname").description("작성자 닉네임"),
+                                fieldWithPath("result.writerId").description("작성자 ID"),
+                                fieldWithPath("result.writerNickname").description("작성자 닉네임"),
                                 fieldWithPath("result.interestId").description("관심사 ID"),
                                 fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                 fieldWithPath("result.createdAt").description("생성 시간"),
                                 fieldWithPath("result.updatedAt").description("수정 시간"),
                                 fieldWithPath("result.content").description("게시글 내용"),
-                                fieldWithPath("result.likeCount").description("좋아요 수")
+                                fieldWithPath("result.likeCount").description("좋아요 수"),
+                                fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                         )));
     }
 }

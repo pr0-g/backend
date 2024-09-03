@@ -12,27 +12,29 @@ import java.time.LocalDateTime;
 public class PostDetailResponse {
     private Long id;
     private String title;
-    private Long userId;
-    private String userNickname;
+    private Long writerId;
+    private String writerNickname;
     private Long interestId;
     private String thumbnailUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String content;
     private long likeCount;
+    private boolean userLiked;
 
-    public static PostDetailResponse from(Post post, PostContent postContent, String userNickname,long likeCount) {
+    public static PostDetailResponse from(Post post, PostContent postContent, String writerNickname,long likeCount, boolean userLiked) {
         return PostDetailResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
-                .userId(post.getUserId())
-                .userNickname(userNickname)
+                .writerId(post.getUserId())
+                .writerNickname(writerNickname)
                 .interestId(post.getInterestId())
                 .thumbnailUrl(post.getThumbnailUrl())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .content(postContent.getContent())
                 .likeCount(likeCount)
+                .userLiked(userLiked)
                 .build();
     }
 }

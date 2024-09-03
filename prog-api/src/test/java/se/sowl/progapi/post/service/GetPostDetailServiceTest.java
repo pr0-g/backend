@@ -1,18 +1,24 @@
 package se.sowl.progapi.post.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
+import se.sowl.progapi.fixture.UserFixture;
+import se.sowl.progapi.oauth.service.OAuthService;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
+import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
 import se.sowl.progdomain.post.repository.PostContentRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
+import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -43,6 +49,7 @@ public class GetPostDetailServiceTest {
     @DisplayName("존재하는 게시글의 상세 정보를 정확히 조회한다")
     void getExistingPostDetail() {
         // given
+        Long userId = 1L;
         Long postId = 1L;
         Post post = Post.builder()
                 .title("Test Title")
@@ -61,7 +68,7 @@ public class GetPostDetailServiceTest {
         when(likeService.getLikeCount(postId)).thenReturn(likeCount);
 
         // when
-        PostDetailResponse response = postService.getPostDetail(postId);
+        PostDetailResponse response = postService.getPostDetail(userId, postId);
 
         // then
         assertNotNull(response);
@@ -78,12 +85,13 @@ public class GetPostDetailServiceTest {
     @DisplayName("존재하지 않는 게시글 조회 시 예외가 발생한다")
     void getNonExistentPostDetail() {
         // given
+        Long userId = 1L;
         Long nonExistentPostId = 999L;
         when(postRepository.findById(nonExistentPostId)).thenReturn(Optional.empty());
 
         // when & then
         PostException.PostNotExistException exception = assertThrows(PostException.PostNotExistException.class,
-                () -> postService.getPostDetail(nonExistentPostId));
+                () -> postService.getPostDetail(userId, nonExistentPostId));
         assertEquals("존재하지 않는 게시글입니다.", exception.getMessage());
 
         verify(postRepository).findById(nonExistentPostId);

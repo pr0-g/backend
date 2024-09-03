@@ -41,7 +41,7 @@ public class PostService {
             postContent = updateExistingPostContent(post.getId(), request.getContent());
         }
 
-        return createPostDetailResponse(post, postContent);
+        return createPostDetailResponse(userId, post, postContent);
     }
 
     private Post createNewPost(Long userId, EditPostRequest request) {
@@ -85,27 +85,32 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostDetailResponse getPostDetail(Long postId) {
+    public PostDetailResponse getPostDetail(Long userId, Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostException.PostNotExistException::new);
         PostContent postContent = postContentRepository.findByPostId(postId)
                 .orElseThrow(PostException.PostContentNotExistException::new);
 
-        return createPostDetailResponse(post, postContent);
+        return createPostDetailResponse(userId, post, postContent);
     }
 
-    private PostDetailResponse createPostDetailResponse(Post post, PostContent postContent) {
-        Long userId = post.getUserId();
-        String userNickname = userRepository.findById(userId)
+    private PostDetailResponse createPostDetailResponse(Long userId, Post post, PostContent postContent) {
+        Long writerId = post.getUserId();
+        String writerNickname = userRepository.findById(writerId)
                 .map(User::getNickname)
                 .orElse("Unknown User");
         long likeCount = likeService.getLikeCount(post.getId());
+        boolean userLiked = userLikePost(userId, post.getId());
 
-        return PostDetailResponse.from(post, postContent, userNickname, likeCount);
+        return PostDetailResponse.from(post, postContent, writerNickname, likeCount, userLiked);
     }
 
     public boolean existsPost(Long postId) {
         return postRepository.existsByIdAndDeletedFalse(postId);
+    }
+
+    private boolean userLikePost(Long userId, Long postId) {
+        return likeService.hasUserLiked(userId, postId);
     }
 
     public Page<PostResponse> toPagePostResponse(Page<Post> pages) {
