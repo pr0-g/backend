@@ -50,4 +50,6 @@ public class UserInterestService {
         return interests.stream().map(interest -> new UserInterest(user, interest)).toList();
     }
 
+
+
 }

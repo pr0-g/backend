@@ -7,6 +7,7 @@ import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.interest.repository.InterestRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,5 +16,9 @@ public class InterestService {
 
     public List<Interest> getList() {
         return interestRepository.findAll();
+    }
+
+    public Optional<Interest> getPostInerest(Long postId){
+        return interestRepository.findById(postId);
     }
 }

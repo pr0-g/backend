@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.post.dto.EditPostRequest;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
@@ -33,6 +34,9 @@ public class EditPostServiceTest {
 
     @Mock
     private LikeService likeService;
+
+    @Mock
+    private InterestService interestService;
 
     @Mock
     private UserRepository userRepository;

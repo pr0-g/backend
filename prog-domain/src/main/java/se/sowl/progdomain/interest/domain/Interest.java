@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -20,6 +22,12 @@ public class Interest {
     private String name;
 
     public Interest(String name) {
+        this.name = name;
+    }
+
+    @Builder
+    public Interest(Long id, String name) {
+        this.id = id;
         this.name = name;
     }
 }

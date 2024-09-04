@@ -6,10 +6,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.post.dto.EditPostRequest;
 import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
+import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
 import se.sowl.progdomain.post.repository.PostContentRepository;
@@ -18,6 +20,7 @@ import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostContentRepository postContentRepository;
     private final LikeService likeService;
-
+    private final InterestService interestService;
     @Transactional
     public PostDetailResponse editPost(Long userId, EditPostRequest request) {
         Post post;
@@ -96,19 +99,28 @@ public class PostService {
 
     private PostDetailResponse createPostDetailResponse(Long userId, Post post, PostContent postContent) {
         Long writerId = post.getUserId();
-        String writerNickname = userRepository.findById(writerId)
-                .map(User::getNickname)
-                .orElse("Unknown User");
+        String writerNickname = getWriterNickname(writerId);
+        String postInterestName = getPostInterestName(post.getId());
         long likeCount = likeService.getLikeCount(post.getId());
         boolean userLiked = userLikePost( post.getId(), userId);
 
-        return PostDetailResponse.from(post, postContent, writerNickname, likeCount, userLiked);
+        return PostDetailResponse.from(post, postContent, writerNickname, postInterestName, likeCount, userLiked);
     }
 
     public boolean existsPost(Long postId) {
         return postRepository.existsByIdAndDeletedFalse(postId);
     }
 
+    private String getWriterNickname(Long writerId) {
+        return userRepository.findById(writerId)
+                .map(User::getNickname)
+                .orElse("Unknown User");
+    }
+    private String getPostInterestName(Long postId) {
+        return interestService.getPostInerest(postId)
+                .map(Interest::getName)
+                .orElse(null);
+    }
     private boolean userLikePost(Long postId, Long userId) {
         return likeService.hasUserLiked(postId, userId );
     }

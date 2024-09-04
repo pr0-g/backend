@@ -19,10 +19,11 @@ public class PostDetailResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String content;
+    private String postInterestName;
     private long likeCount;
     private boolean userLiked;
 
-    public static PostDetailResponse from(Post post, PostContent postContent, String writerNickname,long likeCount, boolean userLiked) {
+    public static PostDetailResponse from(Post post, PostContent postContent, String writerNickname, String postInterestName, long likeCount, boolean userLiked) {
         return PostDetailResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -33,6 +34,7 @@ public class PostDetailResponse {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .content(postContent.getContent())
+                .postInterestName(postInterestName)
                 .likeCount(likeCount)
                 .userLiked(userLiked)
                 .build();

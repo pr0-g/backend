@@ -18,6 +18,7 @@ import se.sowl.progapi.post.dto.EditPostRequest;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
 import se.sowl.progapi.post.service.PostService;
+import se.sowl.progdomain.interest.domain.Interest;
 import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
 
@@ -116,6 +117,7 @@ class PostContentControllerTest {
                                     fieldWithPath("result.createdAt").description("생성 시간"),
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
+                                    fieldWithPath("result.postInterestName").description("게시글 관심사 이름"),
                                     fieldWithPath("result.likeCount").description("좋아요 수"),
                                     fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                             )));
@@ -171,6 +173,7 @@ class PostContentControllerTest {
                                     fieldWithPath("result.createdAt").description("생성 시간"),
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
+                                    fieldWithPath("result.postInterestName").description("게시글 관심사 이름"),
                                     fieldWithPath("result.likeCount").description("좋아요 수"),
                                     fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                             )));
@@ -269,6 +272,7 @@ class PostContentControllerTest {
                                 fieldWithPath("result.createdAt").description("생성 시간"),
                                 fieldWithPath("result.updatedAt").description("수정 시간"),
                                 fieldWithPath("result.content").description("게시글 내용"),
+                                fieldWithPath("result.postInterestName").description("게시글 관심사 이름"),
                                 fieldWithPath("result.likeCount").description("좋아요 수"),
                                 fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                         )));

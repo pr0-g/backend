@@ -1,24 +1,19 @@
 package se.sowl.progapi.post.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import se.sowl.progapi.fixture.UserFixture;
-import se.sowl.progapi.oauth.service.OAuthService;
+import se.sowl.progapi.interest.service.InterestService;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
-import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
 import se.sowl.progdomain.post.repository.PostContentRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
-import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -38,6 +33,9 @@ public class GetPostDetailServiceTest {
 
     @Mock
     private LikeService likeService;
+
+    @Mock
+    private InterestService interestService;
 
     @Mock
     private UserRepository userRepository;
