@@ -100,7 +100,7 @@ public class PostService {
                 .map(User::getNickname)
                 .orElse("Unknown User");
         long likeCount = likeService.getLikeCount(post.getId());
-        boolean userLiked = userLikePost(userId, post.getId());
+        boolean userLiked = userLikePost( post.getId(), userId);
 
         return PostDetailResponse.from(post, postContent, writerNickname, likeCount, userLiked);
     }
@@ -109,8 +109,8 @@ public class PostService {
         return postRepository.existsByIdAndDeletedFalse(postId);
     }
 
-    private boolean userLikePost(Long userId, Long postId) {
-        return likeService.hasUserLiked(userId, postId);
+    private boolean userLikePost(Long postId, Long userId) {
+        return likeService.hasUserLiked(postId, userId );
     }
 
     public Page<PostResponse> toPagePostResponse(Page<Post> pages) {
