@@ -23,7 +23,6 @@ import se.sowl.progdomain.oauth.domain.CustomOAuth2User;
 import se.sowl.progdomain.user.domain.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -56,29 +55,30 @@ class PostContentControllerTest {
 
     private User testUser;
     private CustomOAuth2User customOAuth2User;
-
+    private Interest testInterest;
 
     @BeforeEach
     void setUp() {
         testUser = UserFixture.createUser(1L, "테스트", "테스트유저", "test@example.com", "naver");
         customOAuth2User = UserFixture.createCustomOAuth2User(testUser);
+        testInterest = new Interest(2L, "Test Interest");
         when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
     }
 
     @Nested
     @DisplayName("PUT /api/posts/edit")
-    class eidtPost {
+    class editPost {
         @Test
         @DisplayName("새 게시글 등록 성공")
         @WithMockUser(roles = "USER")
         void createNewPostSuccess() throws Exception {
             // Given
-            EditPostRequest request = new EditPostRequest(null, "New Title", "New Content", 2L, "new_thumbnail.jpg");
+            EditPostRequest request = new EditPostRequest(null, "New Title", "New Content", testInterest.getId(), "new_thumbnail.jpg");
             PostDetailResponse response = PostDetailResponse.builder()
                     .id(1L)
                     .title("New Title")
                     .writerId(testUser.getId())
-                    .interestId(2L)
+                    .interest(testInterest)
                     .thumbnailUrl("new_thumbnail.jpg")
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
@@ -97,6 +97,7 @@ class PostContentControllerTest {
                     .andExpect(jsonPath("$.code").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.id").value(1))
                     .andExpect(jsonPath("$.result.title").value("New Title"))
+                    .andExpect(jsonPath("$.result.interest.id").value(testInterest.getId()))
                     .andDo(document("create-new-post",
                             requestFields(
                                     fieldWithPath("id").description("새 게시글 등록 시 null").optional(),
@@ -112,12 +113,12 @@ class PostContentControllerTest {
                                     fieldWithPath("result.title").description("게시글 제목"),
                                     fieldWithPath("result.writerId").description("작성자 ID"),
                                     fieldWithPath("result.writerNickname").description("작성자 닉네임"),
-                                    fieldWithPath("result.interestId").description("관심사 ID"),
+                                    fieldWithPath("result.interest.id").description("관심사 ID"),
+                                    fieldWithPath("result.interest.name").description("관심사 이름"),
                                     fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                     fieldWithPath("result.createdAt").description("생성 시간"),
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
-                                    fieldWithPath("result.postInterestName").description("게시글 관심사 이름"),
                                     fieldWithPath("result.likeCount").description("좋아요 수"),
                                     fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                             )));
@@ -129,12 +130,12 @@ class PostContentControllerTest {
         void updateExistingPostSuccess() throws Exception {
             // Given
             Long postId = 1L;
-            EditPostRequest request = new EditPostRequest(postId, "Updated Title", "Updated Content", 2L, "updated_thumbnail.jpg");
+            EditPostRequest request = new EditPostRequest(postId, "Updated Title", "Updated Content", testInterest.getId(), "updated_thumbnail.jpg");
             PostDetailResponse response = PostDetailResponse.builder()
                     .id(postId)
                     .title("Updated Title")
                     .writerId(testUser.getId())
-                    .interestId(2L)
+                    .interest(testInterest)
                     .thumbnailUrl("updated_thumbnail.jpg")
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
@@ -153,6 +154,7 @@ class PostContentControllerTest {
                     .andExpect(jsonPath("$.code").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.id").value(postId))
                     .andExpect(jsonPath("$.result.title").value("Updated Title"))
+                    .andExpect(jsonPath("$.result.interest.id").value(testInterest.getId()))
                     .andDo(document("update-existing-post",
                             requestFields(
                                     fieldWithPath("id").description("수정할 게시글 ID"),
@@ -168,12 +170,12 @@ class PostContentControllerTest {
                                     fieldWithPath("result.title").description("수정된 게시글 제목"),
                                     fieldWithPath("result.writerId").description("작성자 ID"),
                                     fieldWithPath("result.writerNickname").description("작성자 닉네임"),
-                                    fieldWithPath("result.interestId").description("관심사 ID"),
+                                    fieldWithPath("result.interest.id").description("관심사 ID"),
+                                    fieldWithPath("result.interest.name").description("관심사 이름"),
                                     fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                     fieldWithPath("result.createdAt").description("생성 시간"),
                                     fieldWithPath("result.updatedAt").description("수정 시간"),
                                     fieldWithPath("result.content").description("게시글 내용"),
-                                    fieldWithPath("result.postInterestName").description("게시글 관심사 이름"),
                                     fieldWithPath("result.likeCount").description("좋아요 수"),
                                     fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                             )));
@@ -186,9 +188,8 @@ class PostContentControllerTest {
             // Given
             Long postId = 1L;
             Long unauthorizedUserId = 2L;
-            EditPostRequest request = new EditPostRequest(postId, "Updated Title", "Updated Content", 2L, "updated_thumbnail.jpg");
+            EditPostRequest request = new EditPostRequest(postId, "Updated Title", "Updated Content", testInterest.getId(), "updated_thumbnail.jpg");
 
-            // CustomOAuth2User 및 관련 mock 설정
             User unauthorizedUser = UserFixture.createUser(unauthorizedUserId, "무권한", "무권한유저", "unauthorized@example.com", "naver");
             CustomOAuth2User unauthorizedOAuth2User = UserFixture.createCustomOAuth2User(unauthorizedUser);
 
@@ -202,7 +203,7 @@ class PostContentControllerTest {
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden()) // 403 Forbidden 응답 확인
+                    .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("FAIL"))
                     .andExpect(jsonPath("$.message").value("게시글 수정 권한이 없습니다."))
                     .andDo(document("update-post-without-authorization",
@@ -221,7 +222,6 @@ class PostContentControllerTest {
         }
     }
 
-
     @Test
     @DisplayName("게시글 상세 조회 성공")
     void getPostDetailSuccess() throws Exception {
@@ -233,7 +233,7 @@ class PostContentControllerTest {
                 .title("Test Title")
                 .writerId(userId)
                 .writerNickname("테스트유저")
-                .interestId(1L)
+                .interest(testInterest)
                 .thumbnailUrl("test.jpg")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -255,6 +255,7 @@ class PostContentControllerTest {
                 .andExpect(jsonPath("$.result.title").value("Test Title"))
                 .andExpect(jsonPath("$.result.writerId").value(userId))
                 .andExpect(jsonPath("$.result.writerNickname").value("테스트유저"))
+                .andExpect(jsonPath("$.result.interest.id").value(testInterest.getId()))
                 .andExpect(jsonPath("$.result.userLiked").value(false))
                 .andDo(document("get-post-detail",
                         queryParameters(
@@ -267,12 +268,12 @@ class PostContentControllerTest {
                                 fieldWithPath("result.title").description("게시글 제목"),
                                 fieldWithPath("result.writerId").description("작성자 ID"),
                                 fieldWithPath("result.writerNickname").description("작성자 닉네임"),
-                                fieldWithPath("result.interestId").description("관심사 ID"),
+                                fieldWithPath("result.interest.id").description("관심사 ID"),
+                                fieldWithPath("result.interest.name").description("관심사 이름"),
                                 fieldWithPath("result.thumbnailUrl").description("썸네일 URL"),
                                 fieldWithPath("result.createdAt").description("생성 시간"),
                                 fieldWithPath("result.updatedAt").description("수정 시간"),
                                 fieldWithPath("result.content").description("게시글 내용"),
-                                fieldWithPath("result.postInterestName").description("게시글 관심사 이름"),
                                 fieldWithPath("result.likeCount").description("좋아요 수"),
                                 fieldWithPath("result.userLiked").description("로그인한 사용자가 좋아요를 눌렀는지 여부")
                         )));

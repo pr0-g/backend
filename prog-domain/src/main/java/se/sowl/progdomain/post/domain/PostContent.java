@@ -3,20 +3,22 @@ package se.sowl.progdomain.post.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "post_contents")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @Column(name = "content", nullable = false)
     private String content;
@@ -27,10 +29,17 @@ public class PostContent {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public PostContent(Long postId, String content) {
-        this.postId = postId;
+    public PostContent(Post post, String content) {
+        this.setPost(post);
         this.content = content;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+        if (post != null && post.getPostContent() != this) {
+            post.setPostContent(this);
+        }
     }
 
     public void updateContent(String newContent) {

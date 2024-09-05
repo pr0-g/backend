@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import se.sowl.progdomain.interest.domain.Interest;
 
 import java.time.LocalDateTime;
 
@@ -23,8 +24,9 @@ public class Post {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "interest_id", nullable = false)
-    private Long interestId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interest_id", nullable = false)
+    private Interest interest;
 
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
@@ -41,20 +43,30 @@ public class Post {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private PostContent postContent;
+
     @Builder
-    public Post(String title, Long userId, Long interestId, String thumbnailUrl, LocalDateTime createdAt) {
+    public Post(String title, Long userId, Interest interest, String thumbnailUrl, LocalDateTime createdAt) {
         this.title = title;
         this.userId = userId;
-        this.interestId = interestId;
+        this.interest = interest;
         this.thumbnailUrl = thumbnailUrl;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
-    public void update(String title, Long interestId, String thumbnailUrl) {
+    public void update(String title, Interest interest, String thumbnailUrl) {
         this.title = title;
-        this.interestId = interestId;
+        this.interest = interest;
         this.thumbnailUrl = thumbnailUrl;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void setPostContent(PostContent postContent) {
+        this.postContent = postContent;
+        if (postContent != null && postContent.getPost() != this) {
+            postContent.setPost(this);
+        }
     }
 
     @PrePersist

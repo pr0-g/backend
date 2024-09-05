@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import se.sowl.progapi.post.dto.PostResponse;
+import se.sowl.progdomain.interest.domain.Interest;
+import se.sowl.progdomain.interest.repository.InterestRepository;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -31,13 +33,28 @@ class RecentPostServiceTest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private InterestRepository interestRepository;
+
     @MockBean
     private LikeService likeService;
+
+    private List<Interest> interests;
 
     @BeforeEach
     void setUp() {
         postRepository.deleteAll();
+        interestRepository.deleteAll();
+        interests = createInterests(10);
         when(likeService.getLikeCount(anyLong())).thenReturn(0L);
+    }
+
+    private List<Interest> createInterests(int count) {
+        List<Interest> interestList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            interestList.add(new Interest("Interest " + (i + 1)));
+        }
+        return interestRepository.saveAll(interestList);
     }
 
     private void createTestPosts(int count) {
@@ -46,7 +63,7 @@ class RecentPostServiceTest {
             Post post = Post.builder()
                     .title("Test Post " + i)
                     .userId((long) (i % 5 + 1))
-                    .interestId((long) (i % 10 + 1))
+                    .interest(interests.get(i % interests.size()))
                     .thumbnailUrl("http://example.com/thumbnail" + i + ".jpg")
                     .build();
             posts.add(post);
@@ -125,6 +142,4 @@ class RecentPostServiceTest {
         assertThat(result.getContent()).hasSize(10);
         assertThat(result.getContent()).allMatch(post -> post.getLikeCount() == 10L);
     }
-
-
 }

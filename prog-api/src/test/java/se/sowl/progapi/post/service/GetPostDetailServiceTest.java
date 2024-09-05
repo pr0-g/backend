@@ -1,99 +1,88 @@
 package se.sowl.progapi.post.service;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-import se.sowl.progapi.interest.service.InterestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import se.sowl.progapi.fixture.PostFixture;
+import se.sowl.progapi.fixture.UserFixture;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
+import se.sowl.progdomain.interest.domain.Interest;
+import se.sowl.progdomain.interest.repository.InterestRepository;
 import se.sowl.progdomain.post.domain.Post;
-import se.sowl.progdomain.post.domain.PostContent;
-import se.sowl.progdomain.post.repository.PostContentRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
+import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class GetPostDetailServiceTest {
 
-    @Mock
+    @Autowired
+    private PostService postService;
+
+    @Autowired
     private PostRepository postRepository;
 
-    @Mock
-    private PostContentRepository postContentRepository;
-
-    @Mock
-    private LikeService likeService;
-
-    @Mock
-    private InterestService interestService;
-
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
-    @InjectMocks
-    private PostService postService;
+    @Autowired
+    private InterestRepository interestRepository;
+
+    @Autowired
+    private LikeService likeService;
+
+    private User testUser;
+    private Interest testInterest;
+    private Post testPost;
+
+    @BeforeEach
+    void setUp() {
+        testUser = userRepository.save(UserFixture.createUser(null, "Test User", "TestNick", "test@example.com", "testProvider"));
+        testInterest = interestRepository.save(PostFixture.createInterest(null, "Test Interest"));
+        testPost = postRepository.save(PostFixture.createPost(null, "Test Title", testUser.getId(), testInterest, "test.jpg", "Test Content"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        postRepository.deleteAll();
+        interestRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("존재하는 게시글의 상세 정보를 정확히 조회한다")
     void getExistingPostDetail() {
         // given
-        Long userId = 1L;
-        Long postId = 1L;
-        Post post = Post.builder()
-                .title("Test Title")
-                .userId(1L)
-                .interestId(1L)
-                .thumbnailUrl("test.jpg")
-                .createdAt(LocalDateTime.now())
-                .build();
-        ReflectionTestUtils.setField(post, "id", postId);
-
-        PostContent postContent = new PostContent(postId, "Test Content");
-        long likeCount = 10L;
-
-        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(postContentRepository.findByPostId(postId)).thenReturn(Optional.of(postContent));
-        when(likeService.getLikeCount(postId)).thenReturn(likeCount);
+        likeService.toggleLike(testPost.getId(), testUser.getId());
 
         // when
-        PostDetailResponse response = postService.getPostDetail(userId, postId);
+        PostDetailResponse response = postService.getPostDetail(testUser.getId(), testPost.getId());
 
         // then
         assertNotNull(response);
-        assertEquals(post.getTitle(), response.getTitle());
-        assertEquals(postContent.getContent(), response.getContent());
-        assertEquals(likeCount, response.getLikeCount());
-
-        verify(postRepository).findById(postId);
-        verify(postContentRepository).findByPostId(postId);
-        verify(likeService).getLikeCount(postId);
+        assertEquals(testPost.getTitle(), response.getTitle());
+        assertEquals(testPost.getPostContent().getContent(), response.getContent());
+        assertEquals(1L, response.getLikeCount());
+        assertEquals(testUser.getNickname(), response.getWriterNickname());
+        assertEquals(testPost.getInterest().getId(), response.getInterest().getId());
+        assertTrue(response.isUserLiked());
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 조회 시 예외가 발생한다")
     void getNonExistentPostDetail() {
         // given
-        Long userId = 1L;
         Long nonExistentPostId = 999L;
-        when(postRepository.findById(nonExistentPostId)).thenReturn(Optional.empty());
 
         // when & then
         PostException.PostNotExistException exception = assertThrows(PostException.PostNotExistException.class,
-                () -> postService.getPostDetail(userId, nonExistentPostId));
+                () -> postService.getPostDetail(testUser.getId(), nonExistentPostId));
         assertEquals("존재하지 않는 게시글입니다.", exception.getMessage());
-
-        verify(postRepository).findById(nonExistentPostId);
-        verifyNoInteractions(postContentRepository);
-        verifyNoInteractions(likeService);
     }
 }

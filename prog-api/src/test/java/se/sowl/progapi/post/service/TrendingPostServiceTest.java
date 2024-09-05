@@ -18,6 +18,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import redis.embedded.RedisServer;
 import se.sowl.progapi.post.dto.PostResponse;
+import se.sowl.progdomain.interest.domain.Interest;
+import se.sowl.progdomain.interest.repository.InterestRepository;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.repository.PostRepository;
 
@@ -44,6 +46,9 @@ class TrendingPostServiceTest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private InterestRepository interestRepository;
+
     @MockBean
     private PostViewService postViewService;
 
@@ -56,6 +61,8 @@ class TrendingPostServiceTest {
     private static StringRedisTemplate redisTemplate;
 
     private static final String TRENDING_POSTS_KEY = "posts:trending";
+
+    private List<Interest> interests;
 
     @BeforeAll
     static void setUpRedisServer() throws IOException {
@@ -74,7 +81,6 @@ class TrendingPostServiceTest {
         }
     }
 
-
     @BeforeEach
     void setUp() {
         redisTemplate = trendingPostService.getRedisTemplate();
@@ -83,8 +89,32 @@ class TrendingPostServiceTest {
                 .serverCommands()
                 .flushAll();
         postRepository.deleteAll();
+        interestRepository.deleteAll();
+        interests = createInterests(10);
         when(postViewService.getViewCount(anyLong())).thenReturn(0L);
         when(likeService.getLikeCount(anyLong())).thenReturn(0L);
+    }
+
+    private List<Interest> createInterests(int count) {
+        List<Interest> interestList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            interestList.add(new Interest("Interest " + (i + 1)));
+        }
+        return interestRepository.saveAll(interestList);
+    }
+
+    private List<Post> createTestPosts(int count) {
+        List<Post> posts = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Post post = Post.builder()
+                    .title("Test Post " + i)
+                    .userId((long) (i % 5 + 1))
+                    .interest(interests.get(i % interests.size()))
+                    .createdAt(LocalDateTime.now().minusDays(i))
+                    .build();
+            posts.add(post);
+        }
+        return postRepository.saveAll(posts);
     }
 
     @Nested
@@ -184,20 +214,6 @@ class TrendingPostServiceTest {
                 assertThat(remainingPosts).doesNotContain(post.getId().toString());
             }
         }
-    }
-
-    private List<Post> createTestPosts(int count) {
-        List<Post> posts = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            Post post = Post.builder()
-                .title("Test Post " + i)
-                .userId((long) (i % 5 + 1))
-                .interestId((long) (i % 10 + 1))
-                .createdAt(LocalDateTime.now().minusDays(i))
-                .build();
-            posts.add(post);
-        }
-        return postRepository.saveAll(posts);
     }
 
     private static int findAvailablePort() throws IOException {

@@ -12,15 +12,14 @@ import se.sowl.progapi.post.dto.PostResponse;
 import se.sowl.progapi.post.dto.PostDetailResponse;
 import se.sowl.progapi.post.exception.PostException;
 import se.sowl.progdomain.interest.domain.Interest;
+import se.sowl.progdomain.interest.repository.InterestRepository;
 import se.sowl.progdomain.post.domain.Post;
 import se.sowl.progdomain.post.domain.PostContent;
-import se.sowl.progdomain.post.repository.PostContentRepository;
 import se.sowl.progdomain.post.repository.PostRepository;
 import se.sowl.progdomain.user.domain.User;
 import se.sowl.progdomain.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,52 +27,57 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final PostContentRepository postContentRepository;
     private final LikeService likeService;
     private final InterestService interestService;
+    private final InterestRepository interestRepository;
+
     @Transactional
     public PostDetailResponse editPost(Long userId, EditPostRequest request) {
         Post post;
-        PostContent postContent;
 
         if (request.getId() == null) {
             post = createNewPost(userId, request);
-            postContent = createNewPostContent(post.getId(), request.getContent());
         } else {
             post = updateExistingPost(userId, request);
-            postContent = updateExistingPostContent(post.getId(), request.getContent());
         }
 
-        return createPostDetailResponse(userId, post, postContent);
+        return createPostDetailResponse(userId, post);
     }
 
     private Post createNewPost(Long userId, EditPostRequest request) {
+        Interest interest = interestRepository.findById(request.getInterestId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심사입니다."));
+
         Post newPost = Post.builder()
                 .title(request.getTitle())
                 .userId(userId)
-                .interestId(request.getInterestId())
+                .interest(interest)
                 .thumbnailUrl(request.getThumbnailUrl())
                 .build();
+
+        PostContent newContent = new PostContent(newPost, request.getContent());
+        newPost.setPostContent(newContent);
+
         return postRepository.save(newPost);
     }
 
     private Post updateExistingPost(Long userId, EditPostRequest request) {
         Post existingPost = findPostById(request.getId());
+        Interest interest = interestRepository.findById(request.getInterestId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심사입니다."));
+
         validatePostOwnership(existingPost, userId);
-        existingPost.update(request.getTitle(), request.getInterestId(), request.getThumbnailUrl());
+        existingPost.update(request.getTitle(), interest, request.getThumbnailUrl());
+
+        PostContent postContent = existingPost.getPostContent();
+        if (postContent == null) {
+            postContent = new PostContent(existingPost, request.getContent());
+            existingPost.setPostContent(postContent);
+        } else {
+            postContent.updateContent(request.getContent());
+        }
+
         return postRepository.save(existingPost);
-    }
-
-    private PostContent createNewPostContent(Long postId, String content) {
-        PostContent newContent = new PostContent(postId, content);
-        return postContentRepository.save(newContent);
-    }
-
-    private PostContent updateExistingPostContent(Long postId, String newContent) {
-        PostContent existingContent = postContentRepository.findByPostId(postId)
-                .orElseThrow(PostException.PostContentNotExistException::new);
-        existingContent.updateContent(newContent);
-        return postContentRepository.save(existingContent);
     }
 
     private Post findPostById(Long postId) {
@@ -91,20 +95,18 @@ public class PostService {
     public PostDetailResponse getPostDetail(Long userId, Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostException.PostNotExistException::new);
-        PostContent postContent = postContentRepository.findByPostId(postId)
-                .orElseThrow(PostException.PostContentNotExistException::new);
-
-        return createPostDetailResponse(userId, post, postContent);
+        return createPostDetailResponse(userId, post);
     }
 
-    private PostDetailResponse createPostDetailResponse(Long userId, Post post, PostContent postContent) {
+    private PostDetailResponse createPostDetailResponse(Long userId, Post post) {
+
         Long writerId = post.getUserId();
         String writerNickname = getWriterNickname(writerId);
-        String postInterestName = getPostInterestName(post.getId());
+        Interest interest = post.getInterest();
         long likeCount = likeService.getLikeCount(post.getId());
-        boolean userLiked = userLikePost( post.getId(), userId);
+        boolean userLiked = userLikePost(post.getId(), userId);
 
-        return PostDetailResponse.from(post, postContent, writerNickname, postInterestName, likeCount, userLiked);
+        return PostDetailResponse.from(post, post.getPostContent(), writerNickname, interest, likeCount, userLiked);
     }
 
     public boolean existsPost(Long postId) {
@@ -116,13 +118,15 @@ public class PostService {
                 .map(User::getNickname)
                 .orElse("Unknown User");
     }
+
     private String getPostInterestName(Long postId) {
         return interestService.getPostInerest(postId)
                 .map(Interest::getName)
                 .orElse(null);
     }
+
     private boolean userLikePost(Long postId, Long userId) {
-        return likeService.hasUserLiked(postId, userId );
+        return likeService.hasUserLiked(postId, userId);
     }
 
     public Page<PostResponse> toPagePostResponse(Page<Post> pages) {
