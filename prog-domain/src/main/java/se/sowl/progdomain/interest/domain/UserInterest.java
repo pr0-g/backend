@@ -2,6 +2,7 @@ package se.sowl.progdomain.interest.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import se.sowl.progdomain.user.domain.User;
@@ -24,6 +25,7 @@ public class UserInterest {
     @JoinColumn(name = "interest_id")
     private Interest interest;
 
+    @Builder
     public UserInterest(User user, Interest interest) {
         this.user = user;
         this.interest = interest;

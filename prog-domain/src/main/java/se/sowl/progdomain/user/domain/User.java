@@ -48,9 +48,6 @@ public class User {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-
-
-
     @Builder
     public User(Long id, String name, String nickname, String email, String provider) {
         this.id = id;

@@ -45,13 +45,14 @@ public class PostService {
     }
 
     private Post createNewPost(Long userId, EditPostRequest request) {
-        Interest interest = interestRepository.findById(request.getInterestId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심사입니다."));
+        if (!interestRepository.existsById(request.getInterestId())) {
+            throw new IllegalArgumentException("존재하지 않는 관심사입니다.");
+        }
 
         Post newPost = Post.builder()
                 .title(request.getTitle())
                 .userId(userId)
-                .interest(interest)
+                .interestId(request.getInterestId())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .build();
 
@@ -63,11 +64,13 @@ public class PostService {
 
     private Post updateExistingPost(Long userId, EditPostRequest request) {
         Post existingPost = findPostById(request.getId());
-        Interest interest = interestRepository.findById(request.getInterestId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심사입니다."));
+
+        if (!interestRepository.existsById(request.getInterestId())) {
+            throw new IllegalArgumentException("존재하지 않는 관심사입니다.");
+        }
 
         validatePostOwnership(existingPost, userId);
-        existingPost.update(request.getTitle(), interest, request.getThumbnailUrl());
+        existingPost.update(request.getTitle(), request.getInterestId(), request.getThumbnailUrl());
 
         PostContent postContent = existingPost.getPostContent();
         if (postContent == null) {
@@ -117,12 +120,6 @@ public class PostService {
         return userRepository.findById(writerId)
                 .map(User::getNickname)
                 .orElse("Unknown User");
-    }
-
-    private String getPostInterestName(Long postId) {
-        return interestService.getPostInerest(postId)
-                .map(Interest::getName)
-                .orElse(null);
     }
 
     private boolean userLikePost(Long postId, Long userId) {

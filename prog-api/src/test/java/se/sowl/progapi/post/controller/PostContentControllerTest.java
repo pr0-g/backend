@@ -61,7 +61,7 @@ class PostContentControllerTest {
     void setUp() {
         testUser = UserFixture.createUser(1L, "테스트", "테스트유저", "test@example.com", "naver");
         customOAuth2User = UserFixture.createCustomOAuth2User(testUser);
-        testInterest = new Interest(2L, "Test Interest");
+        testInterest = new Interest("Test Interest");
         when(oAuthService.loadUser(any())).thenReturn(customOAuth2User);
     }
 

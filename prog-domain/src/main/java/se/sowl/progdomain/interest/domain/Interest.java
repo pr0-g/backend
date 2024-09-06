@@ -21,13 +21,8 @@ public class Interest {
     @Column(nullable = false)
     private String name;
 
-    public Interest(String name) {
-        this.name = name;
-    }
-
     @Builder
-    public Interest(Long id, String name) {
-        this.id = id;
+    public Interest(String name) {
         this.name = name;
     }
 }
