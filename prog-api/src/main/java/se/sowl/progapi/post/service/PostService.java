@@ -118,8 +118,8 @@ public class PostService {
 
     private String getWriterNickname(Long writerId) {
         return userRepository.findById(writerId)
-                .map(User::getNickname)
-                .orElse("Unknown User");
+                .map(user -> user.getNickname() != null ? user.getNickname() : user.getName())
+                .orElse("탈퇴한 사용자");
     }
 
     private boolean userLikePost(Long postId, Long userId) {
