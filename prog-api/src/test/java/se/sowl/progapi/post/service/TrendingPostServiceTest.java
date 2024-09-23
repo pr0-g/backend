@@ -106,10 +106,11 @@ class TrendingPostServiceTest {
     private List<Post> createTestPosts(int count) {
         List<Post> posts = new ArrayList<>();
         for (int i = 0; i < count; i++) {
+            Interest interest = interests.get(i % interests.size());
             Post post = Post.builder()
                     .title("Test Post " + i)
                     .userId((long) (i % 5 + 1))
-                    .interest(interests.get(i % interests.size()))
+                    .interest(interest)
                     .createdAt(LocalDateTime.now().minusDays(i))
                     .build();
             posts.add(post);

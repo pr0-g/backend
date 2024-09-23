@@ -60,10 +60,11 @@ class RecentPostServiceTest {
     private void createTestPosts(int count) {
         List<Post> posts = new ArrayList<>();
         for (int i = 0; i < count; i++) {
+            Interest interest = interests.get(i % interests.size());
             Post post = Post.builder()
                     .title("Test Post " + i)
                     .userId((long) (i % 5 + 1))
-                    .interest(interests.get(i % interests.size()))
+                    .interest(interest)
                     .thumbnailUrl("http://example.com/thumbnail" + i + ".jpg")
                     .build();
             posts.add(post);

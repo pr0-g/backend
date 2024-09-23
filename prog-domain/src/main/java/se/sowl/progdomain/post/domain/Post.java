@@ -24,11 +24,8 @@ public class Post {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "interest_id", nullable = false)
-    private Long interestId;
-
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "interest_id", insertable = false, updatable = false)
+    @JoinColumn(name = "interest_id", nullable = false)
     private Interest interest;
 
     @Column(name = "thumbnail_url")
@@ -50,17 +47,21 @@ public class Post {
     private PostContent postContent;
 
     @Builder
-    public Post(String title, Long userId, Long interestId, String thumbnailUrl, LocalDateTime createdAt) {
+    public Post(String title, Long userId, Interest interest, String thumbnailUrl, LocalDateTime createdAt) {
+        if (interest == null) {
+            throw new IllegalArgumentException("Interest must not be null");
+        }
         this.title = title;
         this.userId = userId;
-        this.interestId = interestId;
+        this.interest = interest;
         this.thumbnailUrl = thumbnailUrl;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
-    public void update(String title, Long interestId, String thumbnailUrl) {
+
+    public void update(String title, Interest interest, String thumbnailUrl) {
         this.title = title;
-        this.interestId = interestId;
+        this.interest = interest;
         this.thumbnailUrl = thumbnailUrl;
         this.updatedAt = LocalDateTime.now();
     }

@@ -45,14 +45,13 @@ public class PostService {
     }
 
     private Post createNewPost(Long userId, EditPostRequest request) {
-        if (!interestRepository.existsById(request.getInterestId())) {
-            throw new IllegalArgumentException("존재하지 않는 관심사입니다.");
-        }
+        Interest interest = interestRepository.findById(request.getInterestId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심사입니다."));
 
         Post newPost = Post.builder()
                 .title(request.getTitle())
                 .userId(userId)
-                .interestId(request.getInterestId())
+                .interest(interest)
                 .thumbnailUrl(request.getThumbnailUrl())
                 .build();
 
@@ -65,12 +64,11 @@ public class PostService {
     private Post updateExistingPost(Long userId, EditPostRequest request) {
         Post existingPost = findPostById(request.getId());
 
-        if (!interestRepository.existsById(request.getInterestId())) {
-            throw new IllegalArgumentException("존재하지 않는 관심사입니다.");
-        }
+        Interest interest = interestRepository.findById(request.getInterestId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심사입니다."));
 
         validatePostOwnership(existingPost, userId);
-        existingPost.update(request.getTitle(), request.getInterestId(), request.getThumbnailUrl());
+        existingPost.update(request.getTitle(), interest, request.getThumbnailUrl());
 
         PostContent postContent = existingPost.getPostContent();
         if (postContent == null) {

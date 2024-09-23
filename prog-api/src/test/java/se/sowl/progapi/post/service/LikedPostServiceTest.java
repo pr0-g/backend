@@ -69,10 +69,11 @@ class LikedPostServiceTest {
         List<Post> posts = new ArrayList<>();
         List<Like> likes = new ArrayList<>();
         for (int i = 0; i < count; i++) {
+            Interest interest = interests.get(i % interests.size());
             Post post = Post.builder()
                     .title("Test Post " + i)
                     .userId(userId)
-                    .interest(interests.get(i % interests.size()))
+                    .interest(interest)
                     .thumbnailUrl("http://example.com/thumbnail" + i + ".jpg")
                     .build();
             posts.add(post);

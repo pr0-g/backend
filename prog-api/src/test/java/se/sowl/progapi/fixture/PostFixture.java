@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 
 public class PostFixture {
     public static Post createPost(Long id, String title, Long userId, Interest interest, String thumbnailUrl, String content) {
+        if (interest == null) {
+            throw new IllegalArgumentException("Interest must not be null");
+        }
         Post post = Post.builder()
                 .title(title)
                 .userId(userId)
