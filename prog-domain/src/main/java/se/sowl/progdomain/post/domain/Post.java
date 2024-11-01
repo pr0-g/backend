@@ -50,6 +50,7 @@ public class Post {
     public Post(String title, Long userId, Interest interest, String thumbnailUrl, LocalDateTime createdAt) {
         if (interest == null) {
             throw new IllegalArgumentException("Interest must not be null");
+
         }
         this.title = title;
         this.userId = userId;
