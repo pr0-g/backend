@@ -65,6 +65,8 @@ public class User {
             log.error("Invalid nickname length: {}", nickname.length());
             throw new InvalidNicknameException("닉네임은 2자 이상 15자 이하여야 합니다.");
         }
+
+
         this.nickname = nickname;
     }
 
