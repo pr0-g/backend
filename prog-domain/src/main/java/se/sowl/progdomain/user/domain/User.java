@@ -59,6 +59,8 @@ public class User {
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
+
+    
     public void updateNickname(String nickname) {
         log.debug("Updating nickname to: {}", nickname);
         if (nickname.length() < 2 || nickname.length() > 15) {
