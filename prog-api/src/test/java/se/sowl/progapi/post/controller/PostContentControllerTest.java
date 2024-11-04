@@ -68,6 +68,7 @@ class PostContentControllerTest {
     @Nested
     @DisplayName("PUT /api/posts/edit")
     class editPost {
+
         @Test
         @DisplayName("새 게시글 등록 성공")
         @WithMockUser(roles = "USER")
