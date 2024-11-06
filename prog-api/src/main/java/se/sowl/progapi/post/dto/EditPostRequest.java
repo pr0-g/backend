@@ -18,6 +18,8 @@ public class EditPostRequest {
     private String content;
 
     @NotNull(message = "관심사 ID는 필수입니다.")
+
+
     private Long interestId;
 
     private String thumbnailUrl;
